@@ -1,0 +1,14 @@
+{
+	"description": "A dataset",
+    "type": "object",
+    "properties": {
+		"description": {"blank": true, "default": "", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": false, "type": "string", "unique": false}, 
+		"directory": {"blank": false, "default": "", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": true, "readonly": false, "type": "string", "unique": false}, 
+		"experiments": {"blank": false, "default": "No default provided.", "help_text": "Many related resources. Can be either a list of URIs or list of individually nested resource data.", "nullable": false, "readonly": false, "related_type": "to_many", "type": "related", "unique": false}, 
+		"id": {"blank": true, "default": "", "help_text": "Integer data. Ex: 2673", "nullable": false, "readonly": false, "type": "integer", "unique": true}, 
+		"immutable": {"blank": true, "default": false, "help_text": "Boolean data. Ex: True", "nullable": false, "readonly": false, "type": "boolean", "unique": false}, 
+		"parameter_sets": {"blank": false, "default": "No default provided.", "help_text": "Many related resources. Can be either a list of URIs or list of individually nested resource data.", "nullable": true, "readonly": false, "related_type": "to_many", "type": "related", "unique": false}, 
+		"resource_uri": {"blank": false, "default": "No default provided.", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": true, "type": "string", "unique": false}
+	}, 
+	"filtering": {"description": ["exact"], "directory": ["exact"], "id": ["exact"]}
+}

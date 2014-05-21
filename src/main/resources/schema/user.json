@@ -1,0 +1,10 @@
+{
+	"description": "A user",
+    "type": "object",
+    "properties": {
+    	"first_name": {"blank": true, "default": "", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": false, "type": "string", "unique": false}, 
+    	"last_name": {"blank": true, "default": "", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": false, "type": "string", "unique": false}, 
+    	"resource_uri": {"blank": false, "default": "No default provided.", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": true, "type": "string", "unique": false}, 
+    	"username": {"blank": false, "default": "No default provided.", "help_text": "Required. 30 characters or fewer. Letters, numbers and @/./+/-/_ characters", "nullable": false, "readonly": false, "type": "string", "unique": true}
+	}
+}

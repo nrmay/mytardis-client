@@ -1,0 +1,14 @@
+{	
+	"description": "A datafile parameter",
+    "type": "object",
+    "properties": {
+		"datetime_value": {"blank": false, "default": "No default provided.", "help_text": "A date & time as a string. Ex: \"2010-11-10T03:07:43\"", "nullable": true, "readonly": false, "type": "datetime", "unique": false}, 
+		"id": {"blank": true, "default": "", "help_text": "Integer data. Ex: 2673", "nullable": false, "readonly": false, "type": "integer", "unique": true}, 
+		"name": {"blank": false, "default": "No default provided.", "help_text": "A single related resource. Can be either a URI or set of nested resource data.", "nullable": false, "readonly": false, "related_type": "to_one", "type": "related", "unique": false}, 
+		"numerical_value": {"blank": false, "default": "No default provided.", "help_text": "Floating point numeric data. Ex: 26.73", "nullable": true, "readonly": false, "type": "float", "unique": false}, 
+		"parameterset": {"blank": false, "default": "No default provided.", "help_text": "A single related resource. Can be either a URI or set of nested resource data.", "nullable": false, "readonly": false, "related_type": "to_one", "type": "related", "unique": false}, 
+		"resource_uri": {"blank": false, "default": "No default provided.", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": true, "type": "string", "unique": false}, 
+		"string_value": {"blank": false, "default": "", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": true, "readonly": false, "type": "string", "unique": false}, 
+		"value": {"blank": true, "default": "No default provided.", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": false, "type": "string", "unique": false}
+	}
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%sn %d{ISO8601} %p %C{1}:%M - %m%n" />
+		</Console>
+		<File name="wsr" fileName="/var/log/tomcat6/wsr.log" bufferedIO="true">
+			<PatternLayout pattern="%m%n" />
+		</File>
+		<File name="tuscany" fileName="/var/log/tomcat6/tuscany.log" bufferedIO="true">
+			<PatternLayout pattern="%m%n" />
+		</File>
+	</Appenders>
+	<Loggers>
+		<Root level="trace">
+			<AppenderRef ref="Console" />
+		</Root>
+		<Logger name="org.walroz.wsr" level="info" additivity="false">
+			<AppenderRef ref="wsr" />
+		</Logger>
+		<Logger name="org.apache.tuscany.sca" level="info" additivity="false">
+			<AppenderRef ref="tuscany" />
+		</Logger>
+	</Loggers>
+</Configuration>

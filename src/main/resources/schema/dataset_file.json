@@ -1,0 +1,21 @@
+{
+	"description": "A dataset to file relation",
+    "type": "object",
+    "properties": {
+		"created_time": {"blank": false, "default": "No default provided.", "help_text": "A date & time as a string. Ex: \"2010-11-10T03:07:43\"", "nullable": true, "readonly": false, "type": "datetime", "unique": false}, 
+		"datafile": {"blank": false, "default": "No default provided.", "help_text": "A file URL as a string. Ex: \"http://media.example.com/media/photos/my_photo.jpg\"", "nullable": false, "readonly": false, "type": "string", "unique": false}, 
+		"dataset": {"blank": false, "default": "No default provided.", "help_text": "A single related resource. Can be either a URI or set of nested resource data.", "nullable": false, "readonly": false, "related_type": "to_one", "type": "related", "unique": false}, 
+		"directory": {"blank": false, "default": "", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": true, "readonly": false, "type": "string", "unique": false}, 
+		"filename": {"blank": false, "default": "No default provided.", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": false, "type": "string", "unique": false}, 
+		"id": {"blank": true, "default": "", "help_text": "Integer data. Ex: 2673", "nullable": false, "readonly": false, "type": "integer", "unique": true}, 
+		"md5sum": {"blank": true, "default": "", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": false, "type": "string", "unique": false}, 
+		"mimetype": {"blank": true, "default": "", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": false, "type": "string", "unique": false}, 
+		"modification_time": {"blank": false, "default": "No default provided.", "help_text": "A date & time as a string. Ex: \"2010-11-10T03:07:43\"", "nullable": true, "readonly": false, "type": "datetime", "unique": false}, 
+		"parameter_sets": {"blank": false, "default": "No default provided.", "help_text": "Many related resources. Can be either a list of URIs or list of individually nested resource data.", "nullable": true, "readonly": false, "related_type": "to_many", "type": "related", "unique": false}, 
+		"replicas": {"blank": false, "default": "No default provided.", "help_text": "Many related resources. Can be either a list of URIs or list of individually nested resource data.", "nullable": false, "readonly": false, "related_type": "to_many", "type": "related", "unique": false}, 
+		"resource_uri": {"blank": false, "default": "No default provided.", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": true, "type": "string", "unique": false}, 
+		"sha512sum": {"blank": true, "default": "", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": false, "type": "string", "unique": false}, 
+		"size": {"blank": true, "default": "", "help_text": "Unicode string data. Ex: \"Hello World\"", "nullable": false, "readonly": false, "type": "string", "unique": false}
+	},
+	"filtering": {"dataset": 2, "directory": ["exact", "startswith"], "filename": ["exact"]}
+}

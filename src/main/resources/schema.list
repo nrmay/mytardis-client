@@ -1,0 +1,16 @@
+{
+	"datafileparameter": {"list_endpoint": "/api/v1/datafileparameter/", "schema": "/api/v1/datafileparameter/schema/"}, 
+	"datafileparameterset": {"list_endpoint": "/api/v1/datafileparameterset/", "schema": "/api/v1/datafileparameterset/schema/"}, 
+	"dataset": {"list_endpoint": "/api/v1/dataset/", "schema": "/api/v1/dataset/schema/"}, 
+	"dataset_file": {"list_endpoint": "/api/v1/dataset_file/", "schema": "/api/v1/dataset_file/schema/"}, 
+	"datasetparameter": {"list_endpoint": "/api/v1/datasetparameter/", "schema": "/api/v1/datasetparameter/schema/"}, 
+	"datasetparameterset": {"list_endpoint": "/api/v1/datasetparameterset/", "schema": "/api/v1/datasetparameterset/schema/"}, 
+	"experiment": {"list_endpoint": "/api/v1/experiment/", "schema": "/api/v1/experiment/schema/"}, 
+	"experimentparameter": {"list_endpoint": "/api/v1/experimentparameter/", "schema": "/api/v1/experimentparameter/schema/"}, 
+	"experimentparameterset": {"list_endpoint": "/api/v1/experimentparameterset/", "schema": "/api/v1/experimentparameterset/schema/"}, 
+	"location": {"list_endpoint": "/api/v1/location/", "schema": "/api/v1/location/schema/"}, 
+	"parametername": {"list_endpoint": "/api/v1/parametername/", "schema": "/api/v1/parametername/schema/"}, 
+	"replica": {"list_endpoint": "/api/v1/replica/", "schema": "/api/v1/replica/schema/"}, 
+	"schema": {"list_endpoint": "/api/v1/schema/", "schema": "/api/v1/schema/schema/"}, 
+	"user": {"list_endpoint": "/api/v1/user/", "schema": "/api/v1/user/schema/"}
+}
