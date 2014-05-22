@@ -2,6 +2,9 @@ package org.mytardis.api.client;
 
 import static org.junit.Assert.*;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,6 +15,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mytardis.api.client.ExperimentTree;
 import org.mytardis.api.client.TardisClient;
+import org.mytardis.api.model.Dataset;
+import org.mytardis.api.model.DatasetFile;
 import org.mytardis.api.model.Experiment;
 import org.mytardis.api.model.User;
 
@@ -54,26 +59,10 @@ public class ExperimentTreeTest {
 		assertNotNull("createdByUser.resourceId is null!",
 				createdByUser.getResourceUri());
 
-		// build experiment
-		tree.setTitle("Test Experiment (" + UUID.randomUUID().toString() + ")");
-		tree.setDescription("A test experiment submitted via the API.");
-		tree.setInstitution("SCSIT, RMIT University.");
-
-		// build parameter sets
-		String ns_server = "http://org.walroz.wsr/server";
-		tree.addParameter(ns_server, "host", "wsrServer1");
-		tree.addParameter(ns_server, "address", "127.0.0.1");
-		tree.addParameter(ns_server, "port", "8080");
-		tree.addParameter(ns_server, "version", "0.6");
+		// build experiment tree
+		tree = this.buildExperiment(tree);
+		tree.setDatasets(this.buildDatasets(client));
 		
-		String ns_job = "http://org.walroz.wsr/job";
-		tree.addParameter(ns_job, "name", "job01");
-		tree.addParameter(ns_job, "test", "boundingTime");
-		tree.addParameter(ns_job, "iterations", "8");
-		tree.addParameter(ns_job, "composite", "parallel-8-base");
-		tree.addParameter(ns_job, "lower_bound", "0");
-		tree.addParameter(ns_job, "upper_bound", "1000");
-
 		// post Experiment Tree
 		String uri = tree.post();
 		assertNotNull("response uri is null!", uri);
@@ -86,7 +75,7 @@ public class ExperimentTreeTest {
 			Integer id = null;
 			for (Experiment item : experiments) {
 				if (item.getResourceUri().equals(uri)
-						&& item.getTitle().equals(tree.getTitle())) {
+						&& item.getTitle().equals(tree.getExperiment().getTitle())) {
 					id = item.getId();
 					assertEquals("createdByUser not matched!",
 							createdByUser.getResourceUri(), item.getCreatedBy());
@@ -100,4 +89,117 @@ public class ExperimentTreeTest {
 		// finished
 		return;
 	}
+
+	/*******************
+	 * private methods *
+	 *******************/
+
+	private ExperimentTree buildExperiment(ExperimentTree tree) {
+		logger.debug("start!");
+		ExperimentTree result = tree;
+
+		// set experiment attributes
+		Experiment experiment = tree.getExperiment();
+		experiment.setTitle("Test Experiment (" + UUID.randomUUID().toString()
+				+ ")");
+		experiment
+				.setDescription("Experiment uploaded by myTardis API Client."
+						+ " See http://github.com/nrmay/mytardis-client");
+		Date now = new Date();
+		String created = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now);
+		experiment.setCreatedTime(created);
+		experiment.setInstitutionName("RMIT University.");
+
+		// build parameter sets
+		String ns_server = "http://org.walroz.wsr/server";
+		result.addParameter(ns_server, "host", "wsrServer1");
+		result.addParameter(ns_server, "address", "127.0.0.1");
+		result.addParameter(ns_server, "port", "8080");
+		result.addParameter(ns_server, "version", "0.6");
+
+		String ns_job = "http://org.walroz.wsr/job";
+		result.addParameter(ns_job, "name", "job01");
+		result.addParameter(ns_job, "test", "boundingTime");
+		result.addParameter(ns_job, "iterations", "8");
+		result.addParameter(ns_job, "composite", "parallel-8-base");
+		result.addParameter(ns_job, "lower_bound", "0");
+		result.addParameter(ns_job, "upper_bound", "1000");
+		
+		// finished
+		return result;
+	}
+
+	private List<DatasetTree> buildDatasets(TardisClient client) {
+		logger.debug("start!");
+		List<DatasetTree> result = new ArrayList<DatasetTree>();
+		String ns_iteration = "http://org.walroz.wsr/iteration";
+		
+		// dataset 01
+		DatasetTree tree01 = new DatasetTree(client);
+		Dataset dataset = tree01.getDataset();
+		dataset.setDescription("Iteration #01");
+		dataset.setDirectory("dataset01");
+		tree01.addParameter(ns_iteration, "name", "01");
+		tree01.setDatasets(this.buildDatasetFiles01(client));
+		result.add(tree01);
+		
+		
+		// dataset 02
+		DatasetTree tree02 = new DatasetTree(client);
+		dataset = tree02.getDataset();
+		dataset.setDescription("Iteration #02");
+		dataset.setDirectory("dataset02");
+		tree02.addParameter(ns_iteration, "name", "02");
+		tree02.setDatasets(this.buildDatasetFiles02(client));
+		result.add(tree02);
+		
+		// finished
+		return result;
+	}
+
+	private List<DatafileTree> buildDatasetFiles01(TardisClient client) {
+		logger.debug("start!");
+		List<DatafileTree> result = new ArrayList<DatafileTree>();
+		
+		// results.xml
+		DatafileTree tree01 = new DatafileTree(client);
+		DatasetFile file = tree01.getDatafile();
+		file.setDirectory("/Users/nmay/git/mytardis-client/src/test/resources");
+		file.setFilename("result(1).xml");
+		result.add(tree01);
+		
+		// group.composite
+		DatafileTree tree02 = new DatafileTree(client);
+		file = tree02.getDatafile();
+		file.setDirectory("/Users/nmay/git/mytardis-client/src/test/resources");
+		file.setFilename("group(1).composite");
+		result.add(tree02);
+			
+		// finished
+		return result;
+	}
+	
+	private List<DatafileTree> buildDatasetFiles02(TardisClient client) {
+		logger.debug("start!");
+		List<DatafileTree> result = new ArrayList<DatafileTree>();
+
+		// results.xml
+		DatafileTree tree01 = new DatafileTree(client);
+		DatasetFile file = tree01.getDatafile();
+		file.setDirectory("/src/test/resources");
+		file.setFilename("result(2).xml");
+		result.add(tree01);
+		
+		// group.composite
+		DatafileTree tree02 = new DatafileTree(client);
+		file = tree02.getDatafile();
+		file.setDirectory("/src/test/resources");
+		file.setFilename("group(2).composite");
+		result.add(tree02);
+
+		
+		// finished
+		return result;
+	}
+	
 }

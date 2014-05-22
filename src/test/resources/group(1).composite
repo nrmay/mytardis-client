@@ -1,0 +1,108 @@
+<composite name="Group-06ffc7bf-85d8-4175-9ec5-3fa1c6e845b6-001" 
+	targetNamespace="http://redundancy.walroz.org/ns/wsr/1.0"
+    xmlns:tuscany="http://tuscany.apache.org/xmlns/sca/1.1"
+    xmlns="http://docs.oasis-open.org/ns/opencsa/sca/200912">
+	<component name="Consumer1">
+		<implementation.java class="org.walroz.wsr.webservice.ConsumerImpl" />
+		<property name="name">Consumer1</property>
+		<property name="boundingTime">1000</property>
+		<property name="strategy">serial</property>
+		<service name="ConsumerService">
+			<interface.java interface="org.walroz.wsr.webservice.ConsumerService" />
+			<binding.ws uri="http://130.56.248.116:8080/Group-06ffc7bf-85d8-4175-9ec5-3fa1c6e845b6-001" />			
+		</service>
+		<reference name="providers" target="Provider1/Provider Provider2/Provider Provider3/Provider Provider4/Provider Provider5/Provider Provider6/Provider Provider7/Provider Provider8/Provider" />
+	</component>
+	<component name="Provider1">
+		<implementation.java class="org.walroz.wsr.webservice.ProviderImpl" />
+		<property name="name">P1</property>
+		<property name="availability">0.58</property>
+		<property name="cost">1</property>
+		<property name="performance">0</property>
+		<service name="Provider">
+			<interface.java interface="org.walroz.wsr.webservice.Provider"
+				callbackInterface="org.walroz.wsr.webservice.ConsumerCallback" />
+		</service>
+	</component>
+	<component name="Provider2">
+		<implementation.java class="org.walroz.wsr.webservice.ProviderImpl" />
+		<property name="name">P2</property>
+		<property name="availability">0.18</property>
+		<property name="cost">1</property>
+		<property name="performance">0</property>
+		<service name="Provider">
+			<interface.java interface="org.walroz.wsr.webservice.Provider"
+				callbackInterface="org.walroz.wsr.webservice.ConsumerCallback" />
+		</service>
+	</component>
+	<component name="Provider3">
+		<implementation.java class="org.walroz.wsr.webservice.ProviderImpl" />
+		<property name="name">P3</property>
+		<property name="availability">0.18</property>
+		<property name="cost">1</property>
+		<property name="performance">0</property>
+		<service name="Provider">
+			<interface.java interface="org.walroz.wsr.webservice.Provider"
+				callbackInterface="org.walroz.wsr.webservice.ConsumerCallback" />
+		</service>
+	</component>
+	<component name="Provider4">
+		<implementation.java class="org.walroz.wsr.webservice.ProviderImpl" />
+		<property name="name">P4</property>
+		<property name="availability">0.18</property>
+		<property name="cost">1</property>
+		<property name="performance">0</property>
+		<service name="Provider">
+			<interface.java interface="org.walroz.wsr.webservice.Provider"
+				callbackInterface="org.walroz.wsr.webservice.ConsumerCallback" />
+		</service>
+	</component>
+	<component name="Provider5">
+		<implementation.java class="org.walroz.wsr.webservice.ProviderImpl" />
+		<property name="name">P5</property>
+		<property name="availability">0.18</property>
+		<property name="cost">1</property>
+		<property name="performance">0</property>
+		<service name="Provider">
+			<interface.java interface="org.walroz.wsr.webservice.Provider"
+				callbackInterface="org.walroz.wsr.webservice.ConsumerCallback" />
+		</service>
+	</component>
+	<component name="Provider6">
+		<implementation.java class="org.walroz.wsr.webservice.ProviderImpl" />
+		<property name="name">P6</property>
+		<property name="availability">0.18</property>
+		<property name="cost">1</property>
+		<property name="performance">0</property>
+		<service name="Provider">
+			<interface.java interface="org.walroz.wsr.webservice.Provider"
+				callbackInterface="org.walroz.wsr.webservice.ConsumerCallback" />
+		</service>
+	</component>
+	<component name="Provider7">
+		<implementation.java class="org.walroz.wsr.webservice.ProviderImpl" />
+		<property name="name">P7</property>
+		<property name="availability">0.18</property>
+		<property name="cost">1</property>
+		<property name="performance">0</property>
+		<service name="Provider">
+			<interface.java interface="org.walroz.wsr.webservice.Provider"
+				callbackInterface="org.walroz.wsr.webservice.ConsumerCallback" />
+		</service>
+	</component>
+	<component name="Provider8">
+		<implementation.java class="org.walroz.wsr.webservice.ProviderImpl" />
+		<property name="name">P8</property>
+		<property name="availability">0.18</property>
+		<property name="cost">1</property>
+		<property name="performance">0</property>
+		<service name="Provider">
+			<interface.java interface="org.walroz.wsr.webservice.Provider"
+				callbackInterface="org.walroz.wsr.webservice.ConsumerCallback" />
+		</service>
+	</component>
+	<!-- 
+	<service name="ConsumerService" promote="Consumer1/ConsumerService">
+	</service>
+	-->
+</composite>

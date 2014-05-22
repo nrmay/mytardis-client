@@ -1,5 +1,7 @@
 package org.mytardis.api.client;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -16,6 +18,8 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.glassfish.jersey.media.multipart.MultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.mytardis.api.model.Datafileparameter;
 import org.mytardis.api.model.Datafileparameterset;
 import org.mytardis.api.model.Dataset;
@@ -36,12 +40,12 @@ import com.google.gson.Gson;
 /**
  * A client for the myTardis RESTful API.
  * 
- * @author Nick May 
+ * @author Nick May
  * @version 1.0
- *
+ * 
  */
 public class TardisClient {
-	
+
 	public static final String version = "/api/v1";
 
 	private Logger logger = LogManager.getLogger(this.getClass());
@@ -168,41 +172,6 @@ public class TardisClient {
 	}
 
 	/**
-	 * Get an Experiment by Title/
-	 * 
-	 * @param username
-	 * @param title
-	 * @return
-	 */
-	// public Experiment getExperimentByTitle(String username, String title) {
-	// logger.debug("start!");
-	// Experiment result = null;
-	//
-	// User user = this.getUserByUsername(username);
-	// if (user != null) {
-	// List<Experiment> experiments;
-	// try {
-	// experiments = this.getObjects(Experiment.class);
-	// if (experiments != null) {
-	// for (Experiment item : experiments) {
-	// if (item.getCreatedBy().toString()
-	// .equals(user.getResourceUri())
-	// && item.getTitle().equals(title)) {
-	// result = item;
-	// break;
-	// }
-	// }
-	// }
-	// } catch (Exception e) {
-	// logger.debug("get experiments failed with: " + e.getMessage());
-	// }
-	// }
-	//
-	// // finished
-	// return result;
-	// }
-	//
-	/**
 	 * Get a User by Username.
 	 * 
 	 * @param username
@@ -231,7 +200,8 @@ public class TardisClient {
 	/**
 	 * Get a User by resource URI.
 	 * 
-	 * @param uri : the resource uri of the user
+	 * @param uri
+	 *            : the resource uri of the user
 	 * @return User : or null if the URI is invalid.
 	 */
 	public User getUser(String uri) {
@@ -258,7 +228,8 @@ public class TardisClient {
 	/**
 	 * Get a list of objects for the given TardisObject class.
 	 * 
-	 * @param clazz extends TardisObject.
+	 * @param clazz
+	 *            extends TardisObject.
 	 * @return List of TardisObjects.
 	 * @throws Exception
 	 *             : thrown when an invalid response is returned.
@@ -322,7 +293,7 @@ public class TardisClient {
 	 *            : TardisObject
 	 */
 	public String postObject(TardisObject object) throws Exception {
-		logger.debug("start! json = " + gson.toJson(object) + "]");
+		logger.debug("start! json = " + gson.toJson(object));
 		String result = null;
 
 		// create meta
@@ -355,6 +326,49 @@ public class TardisClient {
 				}
 			}
 		}
+		// finished
+		return result;
+	}
+
+	public String postMultipart(TardisObject object, FileInputStream stream)
+			throws Exception {
+		logger.debug("start! json = " + gson.toJson(object));
+		String result = null;
+
+		// create meta
+		Meta meta = new Meta();
+		if (object != null && object.getResourceUri() != null) {
+			meta.setNext(object.getResourceUri());
+		} else {
+			meta.setNext(TardisObject.path(object.getClass()));
+		}
+
+		// build target
+		WebTarget target = this.buildWebTarget(meta);
+		logger.debug("target = " + target.toString());
+		
+		// make request
+		@SuppressWarnings("resource")
+		final MultiPart multipart = new MultiPart()
+			.bodyPart(gson.toJson(object),MediaType.APPLICATION_JSON_TYPE)
+			.bodyPart(stream,MediaType.APPLICATION_OCTET_STREAM_TYPE);
+		Response response = target.register(MultiPartFeature.class)
+				.request().post(Entity.entity(multipart, multipart.getMediaType()));
+		
+		// parse response
+		this.checkResponse(response);
+		if (response != null) {
+			logger.debug("response.header = "
+					+ response.getHeaderString("location"));
+			String location = response.getHeaderString("location");
+			if (location != null) {
+				if (location.contains(TardisClient.version)) {
+					String[] parts = location.split(TardisClient.version);
+					result = TardisClient.version + parts[parts.length - 1];
+				}
+			}
+		}
+		
 		// finished
 		return result;
 	}

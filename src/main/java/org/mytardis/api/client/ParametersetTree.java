@@ -9,6 +9,11 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.google.gson.annotations.Expose;
 
+/**
+ * A representation of a parameter set and parameters.
+ * @author Nick May
+ * @version 1.0
+ */
 public class ParametersetTree {
 	
 	@Expose
@@ -16,10 +21,18 @@ public class ParametersetTree {
 	@Expose
 	private List<Parameter> parameters = new ArrayList<Parameter>();
 	
+	/**
+	 * Default Constructor.
+	 * @param schema : the namespace of the schema.
+	 */
 	public ParametersetTree(String schema) {
 		super();
 		this.schema = schema;
 	}
+	
+	/***********************
+	 * Getters and Setters *
+	 ***********************/
 	
 	public String getSchema() {
 		return schema;
@@ -34,6 +47,11 @@ public class ParametersetTree {
 		this.parameters = parameters;
 	}
 	
+	/**
+	 * Add a parameter to the parameter set.
+	 * @param name : parameter name
+	 * @param value : parameter value
+	 */
 	public void addParameter(String name, String value) {
 		Parameter param = new Parameter();
 		param.setName(name);
@@ -41,6 +59,11 @@ public class ParametersetTree {
 		this.parameters.add(param);
 	}
 
+	/************
+	 * Builders *
+	 ************/
+
+	
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
