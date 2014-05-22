@@ -1,7 +1,6 @@
 package org.mytardis.api.client;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -18,8 +17,11 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.glassfish.jersey.media.multipart.MultiPart;
+import org.glassfish.jersey.media.multipart.BodyPart;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.mytardis.api.model.Datafileparameter;
 import org.mytardis.api.model.Datafileparameterset;
 import org.mytardis.api.model.Dataset;
@@ -256,7 +258,8 @@ public class TardisClient {
 			logger.debug("target = " + target.toString());
 
 			// make request
-			Response response = target.request().get();
+			Response response = target.queryParam("format", "json").request()
+					.get();
 
 			// parse response
 			this.checkResponse(response);
@@ -309,8 +312,10 @@ public class TardisClient {
 		logger.debug("target = " + target.toString());
 
 		// make request
-		Response response = target.request().post(
-				Entity.entity(gson.toJson(object),
+		Response response = target
+				.queryParam("format", "json")
+				.request()
+				.post(Entity.entity(gson.toJson(object),
 						MediaType.APPLICATION_JSON_TYPE));
 
 		// parse response
@@ -330,7 +335,7 @@ public class TardisClient {
 		return result;
 	}
 
-	public String postMultipart(TardisObject object, FileInputStream stream)
+	public String postMultipart(TardisObject object, File file)
 			throws Exception {
 		logger.debug("start! json = " + gson.toJson(object));
 		String result = null;
@@ -346,15 +351,24 @@ public class TardisClient {
 		// build target
 		WebTarget target = this.buildWebTarget(meta);
 		logger.debug("target = " + target.toString());
-		
+
 		// make request
-		@SuppressWarnings("resource")
-		final MultiPart multipart = new MultiPart()
-			.bodyPart(gson.toJson(object),MediaType.APPLICATION_JSON_TYPE)
-			.bodyPart(stream,MediaType.APPLICATION_OCTET_STREAM_TYPE);
-		Response response = target.register(MultiPartFeature.class)
-				.request().post(Entity.entity(multipart, multipart.getMediaType()));
-		
+		final BodyPart jsonPart = new FormDataBodyPart("json_data",
+				gson.toJson(object), MediaType.APPLICATION_JSON_TYPE);
+		final BodyPart filePart = new FileDataBodyPart("attached_file", file);
+		FormDataMultiPart multipart = new FormDataMultiPart();
+		//		multipart.field("json_data", gson.toJson(object));
+		multipart.bodyPart(jsonPart);
+		multipart.bodyPart(filePart);
+		logger.debug("multipart mediatype = " + multipart.getMediaType());
+
+		Response response = target
+				.register(MultiPartFeature.class)
+				.request()
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				.post(Entity.entity(multipart,
+						MediaType.MULTIPART_FORM_DATA_TYPE));
+
 		// parse response
 		this.checkResponse(response);
 		if (response != null) {
@@ -368,7 +382,7 @@ public class TardisClient {
 				}
 			}
 		}
-		
+
 		// finished
 		return result;
 	}
@@ -388,8 +402,7 @@ public class TardisClient {
 
 		// add user object
 		result = client.target(uri).register(feature)
-				.register(MediaType.APPLICATION_JSON_TYPE)
-				.queryParam("format", "json");
+				.register(MediaType.APPLICATION_JSON_TYPE);
 
 		logger.debug("target = " + result.toString());
 
@@ -426,10 +439,10 @@ public class TardisClient {
 					+ password + "] is unauthorized!";
 			logger.error(message);
 			throw new Exception(message);
-		} else if (response.getStatus() == 200) {
+		} else if (response.getStatus() == 200 || response.getStatus() == 201) {
 			// ok
 			logger.debug("response status[" + response.getStatus() + "] is ok!");
-		} else if (response.getStatus() == 501) {
+		} else if (response.getStatus() == 500 || response.getStatus() == 501) {
 			// ok
 			String message = "response status[" + response.getStatus()
 					+ "] info[" + response.getStatusInfo() + "]";

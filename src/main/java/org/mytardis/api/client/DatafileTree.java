@@ -1,7 +1,7 @@
 package org.mytardis.api.client;
 
 import java.io.File;
-import java.io.FileInputStream;
+import javax.activation.MimetypesFileTypeMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,15 +49,23 @@ public class DatafileTree extends ParametersetContainer {
 				this.target.setResourceUri("/api/v1/dataset_file/");
 			}
 
+			// get mime type
+			File file = new File(target.getDirectory(), target.getFilename());
+			String mimeType = new MimetypesFileTypeMap().getContentType(file);
+
 			// set properties
 			target.setDataset(datasetUri);
 			target.setParameterSets(this.getParametersets());
+			target.setMimetype(mimeType);
 
 			// post dataset_file
 			try {
-				File file = new File(target.getDirectory(), target.getFilename());
-				FileInputStream stream = new FileInputStream(file);
-				result = client.postMultipart(target, stream);
+				logger.debug("target datafile directory["
+						+ target.getDirectory() + "] name["
+						+ target.getFilename() + "] mimetype["
+						+ target.getMimetype() + "]");
+				
+				result = client.postMultipart(target, file);
 				logger.debug("post datafile = " + result);
 			} catch (Exception e) {
 				logger.debug("post dataset failed with: " + e.getMessage());
