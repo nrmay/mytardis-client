@@ -357,7 +357,6 @@ public class TardisClient {
 				gson.toJson(object), MediaType.APPLICATION_JSON_TYPE);
 		final BodyPart filePart = new FileDataBodyPart("attached_file", file);
 		FormDataMultiPart multipart = new FormDataMultiPart();
-		//		multipart.field("json_data", gson.toJson(object));
 		multipart.bodyPart(jsonPart);
 		multipart.bodyPart(filePart);
 		logger.debug("multipart mediatype = " + multipart.getMediaType());
@@ -365,7 +364,6 @@ public class TardisClient {
 		Response response = target
 				.register(MultiPartFeature.class)
 				.request()
-				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.post(Entity.entity(multipart,
 						MediaType.MULTIPART_FORM_DATA_TYPE));
 
@@ -443,9 +441,9 @@ public class TardisClient {
 			// ok
 			logger.debug("response status[" + response.getStatus() + "] is ok!");
 		} else if (response.getStatus() == 500 || response.getStatus() == 501) {
-			// ok
+			// server error
 			String message = "response status[" + response.getStatus()
-					+ "] info[" + response.getStatusInfo() + "]";
+					+ "] info[" + response.getStatusInfo() + "] = " + response.toString();
 			logger.debug(message);
 			throw new Exception(message);
 		} else {

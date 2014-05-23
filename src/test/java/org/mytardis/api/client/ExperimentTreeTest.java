@@ -3,7 +3,6 @@ package org.mytardis.api.client;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -39,7 +38,6 @@ public class ExperimentTreeTest {
 	public void setUp() throws Exception {
 		// Initialize a client
 		client = new TardisClient(address, user, pass);
-		tree = new ExperimentTree(client);
 	}
 
 	@After
@@ -65,7 +63,7 @@ public class ExperimentTreeTest {
 				createdByUser.getResourceUri());
 
 		// build experiment tree
-		tree = this.buildExperiment(tree);
+		tree = this.buildExperiment(client);
 		tree.setDatasets(this.buildDatasets(client));
 
 		// post Experiment Tree
@@ -100,12 +98,12 @@ public class ExperimentTreeTest {
 	 * private methods *
 	 *******************/
 
-	private ExperimentTree buildExperiment(ExperimentTree tree) {
+	private ExperimentTree buildExperiment(TardisClient client) {
 		logger.debug("start!");
-		ExperimentTree result = tree;
+		ExperimentTree result = new ExperimentTree(client);
 
 		// set experiment attributes
-		Experiment experiment = tree.getExperiment();
+		Experiment experiment = result.getExperiment();
 		experiment.setTitle("Test Experiment (" + UUID.randomUUID().toString()
 				+ ")");
 		experiment.setDescription("Experiment uploaded by myTardis API Client."
