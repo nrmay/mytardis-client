@@ -20,6 +20,7 @@ public class DatafileTree extends ParametersetContainer {
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private TardisClient client = null;
 	private DatasetFile target = new DatasetFile();
+	private File file = null;
 
 	/**
 	 * Default Constructor
@@ -52,35 +53,32 @@ public class DatafileTree extends ParametersetContainer {
 			}
 
 			// get mime type
-			File file = new File(target.getDirectory(), target.getFilename());
-			String mimeType = new MimetypesFileTypeMap().getContentType(file);
+			String mimeType = new MimetypesFileTypeMap()
+					.getContentType(this.file);
 
 			// get md5 checksum
 			try {
-				FileInputStream fis = new FileInputStream(file);
+				FileInputStream fis = new FileInputStream(this.file);
 				target.setMd5sum(DigestUtils.md5Hex(fis));
 			} catch (Exception ex) {
-				logger.debug("generate checksum failed with: " + ex.getMessage());
+				logger.debug("generate checksum failed with: "
+						+ ex.getMessage());
 			}
 
 			// set properties
 			target.setDataset(datasetUri);
 			target.setParameterSets(this.getParametersets());
 			target.setMimetype(mimeType);
-			target.setDirectory(null);
-			target.setSize(Long.toString(file.length()));
+			target.setSize(Long.toString(this.file.length()));
 
 			// post dataset_file
 			try {
-				logger.debug("target datafile directory["
-						+ target.getDirectory() + "] name["
-						+ target.getFilename() + "] mimetype["
-						+ target.getMimetype() + "] checksum["
-						+ target.getMd5sum() + "] size (MB)["
-						+ target.getSize() + "]  directory["
-						+ target.getDirectory() + "] ");
+				logger.debug("target datafile name[" + target.getFilename()
+						+ "] mimetype[" + target.getMimetype() 
+						+ "] checksum[" + target.getMd5sum() 
+						+ "] size[" + target.getSize() + "]");
 
-				result = client.postMultipart(target, file);
+				result = client.postMultipart(target, this.file);
 				logger.debug("post datafile = " + result);
 			} catch (Exception e) {
 				logger.debug("post dataset failed with: " + e.getMessage());
@@ -96,12 +94,36 @@ public class DatafileTree extends ParametersetContainer {
 	 * Getters and Setters *
 	 ***********************/
 
+	/**
+	 * Get the DatasetFile Object.
+	 * @return DatasetFile
+	 */
 	public DatasetFile getDatafile() {
 		return target;
 	}
 
+	/**
+	 * Set the DatasetFile Object.
+	 * @param datafile : DatasetFile instance.
+	 */
 	public void setDatafile(DatasetFile datafile) {
 		this.target = datafile;
+	}
+
+	/**
+	 * Get the File associated with this DatasetFile object.
+	 * @return File
+	 */
+	public File getFile() {
+		return file;
+	}
+
+	/**
+	 * Set the File associated with the DatasetFile object.
+	 * @param file : File instance.
+	 */
+	public void setFile(File file) {
+		this.file = file;
 	}
 
 }

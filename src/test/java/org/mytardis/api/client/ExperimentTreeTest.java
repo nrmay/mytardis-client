@@ -49,6 +49,12 @@ public class ExperimentTreeTest {
 	/****************
 	 * Test Methods *
 	 ****************/
+	
+	@Test
+	public void testExperiment() {
+		logger.debug("start!");
+		
+	}
 
 	@Test
 	public void testPostExperimentTree() {
@@ -144,7 +150,7 @@ public class ExperimentTreeTest {
 		dataset.setDescription("Iteration #01");
 		dataset.setDirectory("dataset01");
 		tree01.addParameter(ns_iteration, "name", "01");
-		tree01.setDatasets(this.buildDatasetFiles01(client));
+		tree01.setDatafiles(this.buildDatasetFiles01(client));
 		result.add(tree01);
 
 		// dataset 02
@@ -153,7 +159,7 @@ public class ExperimentTreeTest {
 		dataset.setDescription("Iteration #02");
 		dataset.setDirectory("dataset02");
 		tree02.addParameter(ns_iteration, "name", "02");
-		tree02.setDatasets(this.buildDatasetFiles02(client));
+		tree02.setDatafiles(this.buildDatasetFiles02(client));
 		result.add(tree02);
 
 		// finished
@@ -163,21 +169,19 @@ public class ExperimentTreeTest {
 	private List<DatafileTree> buildDatasetFiles01(TardisClient client) {
 		logger.debug("start!");
 		List<DatafileTree> result = new ArrayList<DatafileTree>();
-
+		
 		// results.xml
 		DatafileTree tree01 = new DatafileTree(client);
 		DatasetFile file = tree01.getDatafile();
-		String filename = "results(1).xml";
-		file.setDirectory(this.getDirectory(filename));
-		file.setFilename(filename);
+		file.setFilename("results(1).xml");
+		tree01.setFile(this.getFile(file.getFilename()));
 		result.add(tree01);
 
 		// group.composite
 		DatafileTree tree02 = new DatafileTree(client);
 		file = tree02.getDatafile();
-		filename = "group(1).composite";
-		file.setDirectory(this.getDirectory(filename));
-		file.setFilename(filename);
+		file.setFilename("group(1).composite");
+		tree02.setFile(this.getFile(file.getFilename()));
 		result.add(tree02);
 
 		// finished
@@ -191,31 +195,28 @@ public class ExperimentTreeTest {
 		// results.xml
 		DatafileTree tree01 = new DatafileTree(client);
 		DatasetFile file = tree01.getDatafile();
-		String filename = "results(2).xml";
-		file.setDirectory(this.getDirectory(filename));
-		file.setFilename(filename);
+		file.setFilename("results(2).xml");
+		tree01.setFile(this.getFile(file.getFilename()));
 		result.add(tree01);
 
 		// group.composite
 		DatafileTree tree02 = new DatafileTree(client);
 		file = tree02.getDatafile();
-		filename = "group(2).composite";
-		file.setDirectory(this.getDirectory(filename));
-		file.setFilename(filename);
+		file.setFilename("group(2).composite");
+		tree02.setFile(this.getFile(file.getFilename()));
 		result.add(tree02);
 
 		// finished
 		return result;
 	}
 
-	private String getDirectory(String filename) {
-		String result = null;
-		
+	private File getFile(String filename) {
+		File result = null;
 		URL url = getClass().getResource("/" + filename);
 		assertNotNull("Test file[" + filename + "] not found!", url);
+
 		try {
-			File file = new File(URLDecoder.decode( url.getFile(), "UTF-8" ) );
-			result = file.getParent();
+			result = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			fail("failed with: " + e.getMessage());
 		}

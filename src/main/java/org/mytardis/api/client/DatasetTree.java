@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.mytardis.api.model.Dataset;
 
 /**
- * A respresentation of a dataset.
+ * A representation of a dataset.
  * 
  * @author Nick may
  * @version 1.0
@@ -84,11 +84,11 @@ public class DatasetTree extends ParametersetContainer {
 		this.target = dataset;
 	}
 
-	public List<DatafileTree> getDatasets() {
+	public List<DatafileTree> getDatafiles() {
 		return datafiles;
 	}
 
-	public void setDatasets(List<DatafileTree> datafiles) {
+	public void setDatafiles(List<DatafileTree> datafiles) {
 		this.datafiles = datafiles;
 	}
 
