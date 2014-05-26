@@ -60,7 +60,7 @@ public class TardisClientTest {
 			logger.debug("response.resourUri = " + uri);
 			assertNotNull("uri is null!", uri);
 			assertTrue("uri not an experiment resource!",
-					uri.contains(TardisClient.version + "/experiment/"));
+					uri.contains(TardisClient.API_VERSION + "/experiment/"));
 		} catch (Exception e) {
 			fail("post experiment failed with: " + e.getMessage());
 		}
@@ -180,9 +180,9 @@ public class TardisClientTest {
 	@Test
 	public void testVersion() {
 		logger.debug("start!");
-		assertNotNull("TardisClient.version is null!", TardisClient.version);
+		assertNotNull("TardisClient.version is null!", TardisClient.API_VERSION);
 		assertEquals("TardisClient.version not matched!", this.expectedVersion,
-				TardisClient.version);
+				TardisClient.API_VERSION);
 		// finished
 		return;
 	}
@@ -284,8 +284,8 @@ public class TardisClientTest {
 				experiment.getCreatedBy());
 
 		User user = client.getUser(experiment.getCreatedBy().toString());
-		logger.debug("user = " + user.toString());
 		assertNotNull("createdBy user in null!", user);
+		logger.debug("user = " + user.toString());
 		assertNotNull("user.firstname is null!", user.getFirstName());
 		assertNotNull("user.lastname is null!", user.getLastName());
 		assertEquals("user.firstname not matched!", "Ad", user.getFirstName());

@@ -3,8 +3,10 @@ package org.mytardis.api.client;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.client.Client;
@@ -48,17 +50,21 @@ import com.google.gson.Gson;
  */
 public class TardisClient {
 
-	public static final String version = "/api/v1";
+	public static final String API_VERSION = "/api/v1";
+	public static final int PUBLIC_ACCESS_NONE  = 1;
+	public static final int PUBLIC_ACCESS_METADATA = 2;
+	public static final int PUBLIC_ACCESS_FULL = 3;
 
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private Gson gson = new Gson();
-
 	private String address = "";
 	private String user = "";
 	private String pass = "";
 	private URI uri = null;
 	private Integer limit = null;
-
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	
+	
 	/**********************
 	 * Constructors *
 	 **********************/
@@ -325,9 +331,9 @@ public class TardisClient {
 					+ response.getHeaderString("location"));
 			String location = response.getHeaderString("location");
 			if (location != null) {
-				if (location.contains(TardisClient.version)) {
-					String[] parts = location.split(TardisClient.version);
-					result = TardisClient.version + parts[parts.length - 1];
+				if (location.contains(TardisClient.API_VERSION)) {
+					String[] parts = location.split(TardisClient.API_VERSION);
+					result = TardisClient.API_VERSION + parts[parts.length - 1];
 				}
 			}
 		}
@@ -374,15 +380,25 @@ public class TardisClient {
 					+ response.getHeaderString("location"));
 			String location = response.getHeaderString("location");
 			if (location != null) {
-				if (location.contains(TardisClient.version)) {
-					String[] parts = location.split(TardisClient.version);
-					result = TardisClient.version + parts[parts.length - 1];
+				if (location.contains(TardisClient.API_VERSION)) {
+					String[] parts = location.split(TardisClient.API_VERSION);
+					result = TardisClient.API_VERSION + parts[parts.length - 1];
 				}
 			}
 		}
 
 		// finished
 		return result;
+	}
+	
+	/**
+	 * Format Date object to Tardis Format.
+	 * 
+	 * @param date : Date
+	 * @return String : in format 'yyyy-MM-ddTHH:mm:ss'
+	 */
+	public String formatDate(Date date) {
+		return this.sdf.format(date);
 	}
 
 	/*******************
@@ -406,10 +422,10 @@ public class TardisClient {
 
 		if (meta.getNext() != null) {
 			String path = meta.getNext().split("\\?")[0];
-			if (path.startsWith(TardisClient.version)) {
+			if (path.startsWith(TardisClient.API_VERSION)) {
 				result = result.path(path);
 			} else {
-				result = result.path(TardisClient.version).path(path);
+				result = result.path(TardisClient.API_VERSION).path(path);
 			}
 			if (meta.getLimit() != null && meta.getLimit() > 0) {
 				result = result.queryParam("limit", meta.getLimit());
@@ -452,7 +468,7 @@ public class TardisClient {
 					+ "] not ok!");
 		}
 	}
-
+	
 	/***********************
 	 * getters and setters *
 	 ***********************/
