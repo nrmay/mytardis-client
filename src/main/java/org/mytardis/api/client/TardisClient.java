@@ -51,10 +51,11 @@ import com.google.gson.Gson;
 public class TardisClient {
 
 	public static final String API_VERSION = "/api/v1";
-	public static final int PUBLIC_ACCESS_NONE  = 1;
-	public static final int PUBLIC_ACCESS_METADATA = 2;
-	public static final int PUBLIC_ACCESS_FULL = 3;
-
+	public static final String NO_DEFAULT_PROVIDED = "No default provided.";
+//	public static final int PUBLIC_ACCESS_NONE  = 1;
+//	public static final int PUBLIC_ACCESS_METADATA = 2;
+//	public static final int PUBLIC_ACCESS_FULL = 3;
+	
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private Gson gson = new Gson();
 	private String address = "";

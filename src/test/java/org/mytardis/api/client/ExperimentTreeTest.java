@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.internal.Errors;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,6 @@ public class ExperimentTreeTest {
 	public Date start = null;
 	public Date end = null;
 
-	
 	@Before
 	public void setUp() throws Exception {
 		// Initialize a client
@@ -62,32 +62,68 @@ public class ExperimentTreeTest {
 	/****************
 	 * Test Methods *
 	 ****************/
-	
+
 	@Test
 	public void testVerifyTree() {
 		logger.debug("start!");
-		
+
 		// create experiment
 		ExperimentTree tree = new ExperimentTree(client);
 		Experiment exp = tree.getExperiment();
 		assertNotNull("new experiment is null!", exp);
-		// check messages: required fields are title, ?
-		
-		
+		// check messages: required fields, including: title.
+		assertNotNull("errors is null!", tree.getErrors());
+
 		// verify
 		assertFalse("verify new experiment did not fail!", tree.verify());
-				
+		assertFalse("errors is empty!", tree.getErrors().isEmpty());
+		assertEquals("errors length not matched!", Integer.valueOf(1),
+				Integer.valueOf(tree.getErrors().size()));
+		assertEquals("errors[0] not matched!", "Experiment.title: not found.",
+				tree.getErrors().get(0));
+
 		// check invalid fields not set
 		// createdBy, createdTime, id, publicAccess, resourceUri, updateTime.
-		
-		
-		// check values of available fields
-		// approved, description, endTime, handle, institutionName, locked, startTime, title, url.
-		
+		exp.setCreatedBy("/api/v1/user/1/");
+		exp.setCreatedTime(client.formatDate(start));
+		exp.setId(1);
+		exp.setPublicAccess(2);
+		exp.setResourceUri("/api/v1/experiment/1/");
+		exp.setUpdateTime(client.formatDate(end));
+		// verify
+		assertFalse("verify invalid fields did not fail!", tree.verify());
+		assertFalse("errors is empty!", tree.getErrors().isEmpty());
+		assertEquals("errors length not matched!", Integer.valueOf(7),
+				Integer.valueOf(tree.getErrors().size()));
+		assertEquals("errors[0] not matched!", 
+				"Experiment.title: not found.", tree.getErrors().get(0));
+		assertEquals("errors[1] not matched!",
+				"Experiment.created_by: is not null.", tree.getErrors().get(1));
+		assertEquals("errors[2] not matched!", 
+				"Experiment.created_time: is not null.", tree.getErrors().get(2));
+		assertEquals("errors[3] not matched!",
+				"Experiment.id: is not null.", tree.getErrors().get(3));
+		assertEquals("errors[4] not matched!",
+				"Experiment.public_access: invalid value = 2", tree.getErrors().get(4));
+		assertEquals("errors[5] not matched!", 
+				"Experiment.resource_uri: is not null.", tree.getErrors().get(5));
+		assertEquals("errors[6] not matched!",
+				"Experiment.updated_time: is not null.", tree.getErrors().get(6));
+
+		// check values of available fields:   approved, description, endTime, 
+		//    handle, institutionName, locked, startTime, title, url.
+		tree = new ExperimentTree(client);
+		exp = tree.getExperiment();
+		exp.setTitle("Test Available Fields.");
+		exp.setDescription(null);
+		exp.setHandle(null);
+		exp.setInstitutionName(null);
+		exp.setStartTime(null);
+		exp.setUrl(null);
 		
 		// check invalid parameters
 		// schemas or names.
-		
+
 		// finished
 		return;
 	}

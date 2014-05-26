@@ -17,7 +17,7 @@ import org.mytardis.api.model.Experiment;
  * 
  */
 public class ExperimentTree extends ParametersetContainer {
-	
+
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private TardisClient client = null;
 	private Experiment experiment = new Experiment();
@@ -53,10 +53,34 @@ public class ExperimentTree extends ParametersetContainer {
 		if (experiment == null) {
 			errors.add("Experiment not found!");
 		} else {
-			// TODO: check attributes
+			// check attributes
 			if (experiment.getTitle() == null
-					|| experiment.getTitle().isEmpty()) {
-				errors.add("Experiment.title not found!");
+					|| experiment.getTitle().isEmpty()
+					|| experiment.getTitle().equals(
+							TardisClient.NO_DEFAULT_PROVIDED)) {
+				errors.add("Experiment.title: not found.");
+			}
+			if (experiment.getCreatedBy() != null) {
+				errors.add("Experiment.created_by: is not null.");
+			}
+			if (experiment.getCreatedTime() != null) {
+				errors.add("Experiment.created_time: is not null.");
+			}
+			if (experiment.getId() != null) {
+				errors.add("Experiment.id: is not null.");
+			}
+			if (experiment.getPublicAccess() != null
+					&& experiment.getPublicAccess() != 1) {
+				errors.add("Experiment.public_access: invalid value = "
+						+ experiment.getPublicAccess());
+			}
+			if (experiment.getResourceUri() != null
+					&& !experiment.getResourceUri().equals(
+							TardisClient.NO_DEFAULT_PROVIDED)) {
+				errors.add("Experiment.resource_uri: is not null.");
+			}
+			if (experiment.getUpdateTime() != null) {
+				errors.add("Experiment.updated_time: is not null.");
 			}
 		}
 
@@ -102,6 +126,8 @@ public class ExperimentTree extends ParametersetContainer {
 		}
 
 		// finished
+		logger.debug("errors count = " + errors.size());
+		logger.debug("errors = " + errors);
 		return result;
 	}
 
