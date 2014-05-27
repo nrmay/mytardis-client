@@ -1,12 +1,15 @@
 package org.mytardis.api.client;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mytardis.api.model.Dataset;
-import org.mytardis.api.model.DatasetFile;
 import org.mytardis.api.model.Experiment;
 
 /**
@@ -16,13 +19,14 @@ import org.mytardis.api.model.Experiment;
  * @version 1.0
  * 
  */
-public class ExperimentTree extends ParametersetContainer {
+public class ExperimentTree extends TardisObjectContainer {
 
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private TardisClient client = null;
 	private Experiment experiment = new Experiment();
 	private List<DatasetTree> datasets = new ArrayList<DatasetTree>();
-	private List<String> errors = new ArrayList<String>();
+
+	// private List<String> errors = new ArrayList<String>();
 
 	/******************
 	 * public methods *
@@ -40,99 +44,142 @@ public class ExperimentTree extends ParametersetContainer {
 	}
 
 	/**
-	 * Verify the experiment, data set and data file trees.
-	 * Error messages are written to the errors attribute.
+	 * Verify the experiment, data set and data file trees. Error messages are
+	 * written to the errors attribute.
+	 * 
 	 * @return boolean : true if no errors.
 	 */
 	public boolean verify() {
 		logger.debug("start!");
 		boolean result = false;
-		errors = new ArrayList<String>();
+		List<String> messages = new ArrayList<String>();
+
+		// check tree and parameter sets
+		messages.addAll(this.checkTree());
+
+		// validate data sets
+		for (DatasetTree dstree : this.getDatasets()) {
+			messages.addAll(dstree.checkTree());
+
+			// validate data files
+			for (DatafileTree dftree : dstree.getDatafiles()) {
+				messages.addAll(dftree.checkTree());
+			}
+		}
+
+		// check errors
+		if (messages.isEmpty()) {
+			result = true;
+		}
+
+		// finished
+		logger.debug("errors count = " + messages.size());
+		if (messages.size() > 0) {
+			logger.debug("errors = " + messages.toString());
+		}
+		return result;
+	}
+
+	/**
+	 * Check the ExperimentTree for errors.
+	 * 
+	 * @return List of error messages as Strings
+	 */
+	public List<String> checkTree() {
+		logger.debug("start!");
+		this.clearErrors();
+		this.checkParametersetTree(client);
 
 		// validate experiment
 		if (experiment == null) {
-			errors.add("Experiment not found!");
+			this.addError("Experiment not found!");
 		} else {
-			// check attributes
+			// check invalid attributes
 			if (experiment.getTitle() == null
-					|| experiment.getTitle().isEmpty()
-					|| experiment.getTitle().equals(
-							TardisClient.NO_DEFAULT_PROVIDED)) {
-				errors.add("Experiment.title: not found.");
+					|| experiment.getTitle().isEmpty()) {
+				this.addError("Experiment.title: not found.");
+			} else {
+				if (experiment.getTitle().equals(TardisObject.NO_DEFAULT)) {
+					this.addError("Experiment.title: cannot be \'"
+							+ TardisObject.NO_DEFAULT + "\'");
+				}
 			}
 			if (experiment.getCreatedBy() != null) {
-				errors.add("Experiment.created_by: is not null.");
+				this.addError("Experiment.created_by: is not null.");
 			}
 			if (experiment.getCreatedTime() != null) {
-				errors.add("Experiment.created_time: is not null.");
+				this.addError("Experiment.created_time: is not null.");
 			}
 			if (experiment.getId() != null) {
-				errors.add("Experiment.id: is not null.");
+				this.addError("Experiment.id: is not null.");
 			}
 			if (experiment.getPublicAccess() != null
 					&& experiment.getPublicAccess() != 1) {
-				errors.add("Experiment.public_access: invalid value = "
+				this.addError("Experiment.public_access: invalid value = "
 						+ experiment.getPublicAccess());
 			}
 			if (experiment.getResourceUri() != null
 					&& !experiment.getResourceUri().equals(
 							TardisClient.NO_DEFAULT_PROVIDED)) {
-				errors.add("Experiment.resource_uri: is not null.");
+				this.addError("Experiment.resource_uri: is not null.");
 			}
 			if (experiment.getUpdateTime() != null) {
-				errors.add("Experiment.updated_time: is not null.");
-			}
-		}
-
-		// check parameter sets
-		errors.addAll(this.checkParametersetTree(client));
-
-		// validate data sets
-		for (DatasetTree dstree : this.getDatasets()) {
-			// check parameter sets
-			errors.addAll(dstree.checkParametersetTree(client));
-
-			// check data set
-			Dataset dataset = dstree.getDataset();
-			if (dataset == null) {
-				errors.add("Dataset not found!");
-			} else {
-				// TODO: check attributes
-
+				this.addError("Experiment.updated_time: is not null.");
 			}
 
-			// validate data files
-			for (DatafileTree dftree : dstree.getDatafiles()) {
-				// check parameter sets
-				errors.addAll(dftree.checkParametersetTree(client));
-
-				// check data file
-				DatasetFile datafile = dftree.getDatafile();
-				if (datafile == null) {
-					errors.add("DatasetFile not found!");
-				} else {
-					// TODO: check attributes
-
+			// check valid attributes
+			if (experiment.getHandle() != null
+					&& !experiment.getHandle().isEmpty()) {
+				try {
+					@SuppressWarnings("unused")
+					URI handle = new URI(experiment.getHandle());
+				} catch (URISyntaxException e) {
+					this.addError("Experiment.handle: is not a valid URI.");
 				}
-
-				// TODO: check file
-
 			}
-		}
+			if (experiment.getUrl() != null && !experiment.getUrl().isEmpty()
+					&& !experiment.getUrl().equals(TardisObject.NO_DEFAULT)) {
+				try {
+					@SuppressWarnings("unused")
+					URL url = new URL(experiment.getUrl());
+				} catch (MalformedURLException e) {
+					this.addError("Experiment.url: is not a valid URL.");
+				}
+			}
+			if (experiment.getStartTime() != null
+					&& experiment.getStartTime().getClass() != Date.class) {
+				try {
+					String datetime = (String) experiment.getStartTime();
+					if (!client.checkDate(datetime)) {
+						this.addError("Experiment.start_time: is invalid.");
+					}
+				} catch (Exception e) {
+					logger.debug(e.toString());
+					this.addError("Experiment.start_time: is invalid.");
+				}
+			}
+			if (experiment.getEndTime() != null
+					&& experiment.getEndTime().getClass() != Date.class) {
+				try {
+					String datetime = (String) experiment.getEndTime();
+					if (!client.checkDate(datetime)) {
+						this.addError("Experiment.end_time: is invalid.");
+					}
+				} catch (Exception e) {
+					logger.debug(e.toString());
+					this.addError("Experiment.end_time: is invalid.");
+				}
+			}
 
-		// check errors
-		if (errors.isEmpty()) {
-			result = true;
 		}
 
 		// finished
-		logger.debug("errors count = " + errors.size());
-		logger.debug("errors = " + errors);
-		return result;
+		return this.getErrors();
 	}
 
 	/**
 	 * Post the Experiment to a myTardis instance.
+	 * 
 	 * @return String : the resource Uri of the new experiment.
 	 */
 	public String post() {
@@ -206,15 +253,6 @@ public class ExperimentTree extends ParametersetContainer {
 	 */
 	public void setDatasets(List<DatasetTree> datasets) {
 		this.datasets = datasets;
-	}
-
-	/**
-	 * Get error messages.
-	 * 
-	 * @return List of Strings.
-	 */
-	public List<String> getErrors() {
-		return this.errors;
 	}
 
 }

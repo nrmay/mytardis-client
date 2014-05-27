@@ -3,6 +3,7 @@ package org.mytardis.api.client;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,10 +53,10 @@ public class TardisClient {
 
 	public static final String API_VERSION = "/api/v1";
 	public static final String NO_DEFAULT_PROVIDED = "No default provided.";
-//	public static final int PUBLIC_ACCESS_NONE  = 1;
-//	public static final int PUBLIC_ACCESS_METADATA = 2;
-//	public static final int PUBLIC_ACCESS_FULL = 3;
-	
+	// public static final int PUBLIC_ACCESS_NONE = 1;
+	// public static final int PUBLIC_ACCESS_METADATA = 2;
+	// public static final int PUBLIC_ACCESS_FULL = 3;
+
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private Gson gson = new Gson();
 	private String address = "";
@@ -64,8 +65,7 @@ public class TardisClient {
 	private URI uri = null;
 	private Integer limit = null;
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	
-	
+
 	/**********************
 	 * Constructors *
 	 **********************/
@@ -85,6 +85,9 @@ public class TardisClient {
 		this.address = address;
 		this.user = username;
 		this.pass = passwd;
+
+		// initialize date format
+		sdf.setLenient(false);
 
 		// set up tardis uri
 		try {
@@ -207,34 +210,6 @@ public class TardisClient {
 	}
 
 	/**
-	 * Get a User by resource URI.
-	 * 
-	 * @param uri
-	 *            : the resource uri of the user
-	 * @return User : or null if the URI is invalid.
-	 */
-	public User getUser(String uri) {
-		logger.debug("start!");
-		User result = null;
-
-		try {
-			List<User> users = this.getObjects(User.class);
-			if (user != null) {
-				if (users.size() > 1) {
-					throw new Exception("Duplicate User found for path[" + uri
-							+ "]");
-				}
-				result = users.get(0);
-			}
-		} catch (Exception e) {
-			logger.debug("failed with: " + e.getMessage());
-		}
-
-		// finished
-		return result;
-	}
-
-	/**
 	 * Get a list of objects for the given TardisObject class.
 	 * 
 	 * @param clazz
@@ -288,6 +263,65 @@ public class TardisClient {
 				}
 			}
 		}
+		// finished
+		return result;
+	}
+
+	/**
+	 * Get an Object by Id
+	 * 
+	 * @param clazz
+	 *            : of the object.
+	 * @param id
+	 *            : of the object.
+	 * @return TardisObject : of the required class.
+	 * @throws Exception
+	 *             : thrown if the object is not found.
+	 */
+	public <T extends TardisObject> TardisObject getObjectById(Class<T> clazz,
+			Integer id) throws Exception {
+		logger.debug("start!");
+		T result = null;
+
+		// make request
+		WebTarget target = this.buildWebTarget(null);
+		Response response = target.path(TardisClient.API_VERSION)
+				.path(TardisObject.path(clazz)).path(id.toString())
+				.queryParam("format", "json").request().get();
+
+		// check response
+		this.checkResponse(response);
+		result = gson.fromJson(response.readEntity(String.class), clazz);
+
+		// finished
+		return result;
+	}
+
+	/**
+	 * Get an Object by URI
+	 * 
+	 * @param clazz
+	 *            : of the object.
+	 * @param uri
+	 *            : of the object as a String.
+	 * @return TardisObject : of the required class.
+	 * @throws Exception
+	 *             : thrown if the object is not found.
+	 */
+	public <T extends TardisObject> TardisObject getObjectByUri(Class<T> clazz,
+			String uri) throws Exception {
+		logger.debug("start!");
+		T result = null;
+
+		// make request
+		WebTarget target = this.buildWebTarget(null);
+		Response response = target.path(uri).queryParam("format", "json")
+				.request().get();
+
+		// check response
+		this.checkResponse(response);
+		result = gson.fromJson(response.readEntity(String.class), clazz);
+
 		// finished
 		return result;
 	}
@@ -391,15 +425,44 @@ public class TardisClient {
 		// finished
 		return result;
 	}
-	
+
+	/*******************
+	 * Public Methods *
+	 *******************/
+
 	/**
 	 * Format Date object to Tardis Format.
 	 * 
-	 * @param date : Date
+	 * @param date
+	 *            : Date
 	 * @return String : in format 'yyyy-MM-ddTHH:mm:ss'
 	 */
 	public String formatDate(Date date) {
 		return this.sdf.format(date);
+	}
+
+	/**
+	 * Check the String for a valid Date.
+	 * 
+	 * @param date
+	 *            : as a String.
+	 * @return True only if the date parses successfully.
+	 */
+	public boolean checkDate(String date) {
+		logger.debug("start!");
+		boolean result = false;
+
+		try {
+			Date parsedDate = sdf.parse(date);
+			result = true;
+			logger.debug("parsed date = " + parsedDate.toString());
+		} catch (ParseException e) {
+			logger.debug("parse date[" + date + "] failed with: "
+					+ e.getMessage());
+		}
+
+		// finished
+		return result;
 	}
 
 	/*******************
@@ -421,7 +484,7 @@ public class TardisClient {
 
 		logger.debug("target = " + result.toString());
 
-		if (meta.getNext() != null) {
+		if (meta != null && meta.getNext() != null) {
 			String path = meta.getNext().split("\\?")[0];
 			if (path.startsWith(TardisClient.API_VERSION)) {
 				result = result.path(path);
@@ -434,7 +497,6 @@ public class TardisClient {
 			if (meta.getOffset() != null && meta.getOffset() > 0) {
 				result = result.queryParam("offset", meta.getOffset());
 			}
-
 		}
 
 		// finished
@@ -460,7 +522,8 @@ public class TardisClient {
 		} else if (response.getStatus() == 500 || response.getStatus() == 501) {
 			// server error
 			String message = "response status[" + response.getStatus()
-					+ "] info[" + response.getStatusInfo() + "] = " + response.toString();
+					+ "] info[" + response.getStatusInfo() + "] = "
+					+ response.toString();
 			logger.debug(message);
 			throw new Exception(message);
 		} else {
@@ -469,7 +532,7 @@ public class TardisClient {
 					+ "] not ok!");
 		}
 	}
-	
+
 	/***********************
 	 * getters and setters *
 	 ***********************/

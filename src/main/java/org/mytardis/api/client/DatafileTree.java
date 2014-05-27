@@ -2,6 +2,8 @@ package org.mytardis.api.client;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.List;
+
 import javax.activation.MimetypesFileTypeMap;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -15,7 +17,7 @@ import org.mytardis.api.model.DatasetFile;
  * @author Nick May
  * @version 1.0
  */
-public class DatafileTree extends ParametersetContainer {
+public class DatafileTree extends TardisObjectContainer {
 
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private TardisClient client = null;
@@ -33,6 +35,23 @@ public class DatafileTree extends ParametersetContainer {
 		this.client = client;
 	}
 
+
+	/**
+	 * Check Tree for Errors.
+	 * 
+	 * @return List of error messages as Strings.
+	 */
+	public List<String> checkTree() {
+		logger.debug("start!");
+		this.clearErrors();
+		this.checkParametersetTree(client);
+		
+		// TODO: implement...
+		
+		// finished
+		return this.getErrors();
+	}
+	
 	/**
 	 * Post to myTardis
 	 * 

@@ -45,6 +45,64 @@ public class TardisClientTest {
 	 ****************/
 
 	@Test
+	public void testGetObject() {
+		logger.debug("start!");
+
+		Integer id = 1;
+		String uri = "/api/v1/user/1/";
+		User user = null;
+		Schema schema = null;
+
+		// get user by id
+		try {
+			user = (User) client.getObjectById(User.class, id);
+		} catch (Exception e) {
+			fail("getObjectById class[" + user.getClass().getSimpleName()
+					+ "] id[" + id + "]");
+		}
+		assertNotNull("user id[" + id + "] is null!", user);
+		assertNotNull("user id[" + id + "].username is null!",
+				user.getUsername());
+		assertEquals("user id[" + id + "].username not matched!", "admin",
+				user.getUsername());
+
+		// get user by uri
+		try {
+			user = (User) client.getObjectByUri(User.class, uri);
+		} catch (Exception e) {
+			fail("getObjectById class[" + user.getClass().getSimpleName()
+					+ "] id[" + id + "]");
+		}
+		assertNotNull("user uri[" + uri + "] is null!", user);
+		assertNotNull("user uri[" + uri + "].username is null!",
+				user.getUsername());
+		assertEquals("user uri[" + uri + "].username not matched!", "admin",
+				user.getUsername());
+
+		// get invalid user
+		try {
+			id = 101;
+			user = (User) client.getObjectById(User.class, id);
+			assertNull("user id[" + id + "] is not null", user);
+		} catch (Exception e) {
+			fail("get user[invalid id] failed with: " + e.getMessage());
+		}
+		
+		// get schema
+		try {
+			schema = (Schema) client.getObjectByUri(Schema.class, "/api/v1/schema/2");
+			assertNotNull("schema is null!", schema);
+			assertNotNull("schema.name is null!", schema.getName());
+			assertEquals("schema.name not matched!", "job", schema.getName());
+		} catch (Exception e) {
+			fail("get schema failed with: " + e.getMessage());
+		}
+
+		// finished
+		return;
+	}
+
+	@Test
 	public void testPostExperiment() {
 		logger.debug("start!");
 		assertNotNull("TardisClient is null!", client);
@@ -168,9 +226,8 @@ public class TardisClientTest {
 		} catch (Exception e) {
 			// check message
 			assertNotNull("exception.message is null!", e.getMessage());
-			assertEquals("exception.message not matched!",
-					"response status[501] info[NOT IMPLEMENTED]",
-					e.getMessage());
+			assertTrue("exception.message not matched!",
+					e.getMessage().startsWith("response status[501] info[NOT IMPLEMENTED]"));
 		}
 
 		// finished
@@ -283,7 +340,13 @@ public class TardisClientTest {
 		assertEquals("experiment.createdBy not matched!", "/api/v1/user/1/",
 				experiment.getCreatedBy());
 
-		User user = client.getUser(experiment.getCreatedBy().toString());
+		User user = null;
+		try {
+			user = (User) client.getObjectByUri(User.class, experiment
+					.getCreatedBy().toString());
+		} catch (Exception e) {
+			fail("get user by uri failed with: " + e.getMessage());
+		}
 		assertNotNull("createdBy user in null!", user);
 		logger.debug("user = " + user.toString());
 		assertNotNull("user.firstname is null!", user.getFirstName());
@@ -312,7 +375,7 @@ public class TardisClientTest {
 		}
 		assertNotNull("datasets is null!", result);
 		assertFalse("datasets is empty!", result.isEmpty());
-		assertTrue("count not matched!", (result.size() == 1));
+		assertTrue("count not matched!", (result.size() > 1));
 
 		for (Dataset item : result) {
 			logger.debug("item = " + item.toString());
@@ -339,8 +402,7 @@ public class TardisClientTest {
 		}
 		assertNotNull("datasetFiles is null!", result);
 		assertFalse("datasetFiles is empty!", result.isEmpty());
-		assertEquals("count not matched!", Integer.valueOf(2),
-				Integer.valueOf(result.size()));
+		assertTrue("count not matched!", (result.size() > 1));
 
 		for (DatasetFile item : result) {
 			logger.debug("item.id       = " + item.getId());
@@ -372,8 +434,7 @@ public class TardisClientTest {
 		}
 		assertNotNull("datasetFiles is null!", result);
 		assertFalse("datasetFiles is empty!", result.isEmpty());
-		assertEquals("count not matched!", Integer.valueOf(2),
-				Integer.valueOf(result.size()));
+		assertTrue("count not matched!", (result.size() > 1));
 
 		// finished
 		return;
@@ -397,8 +458,7 @@ public class TardisClientTest {
 		}
 		assertNotNull("datasetFiles is null!", result);
 		assertFalse("datasetFiles is empty!", result.isEmpty());
-		assertEquals("count not matched!", Integer.valueOf(2),
-				Integer.valueOf(result.size()));
+		assertTrue("count not matched!", (result.size() > 1));
 
 		// finished
 		return;

@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,7 +14,6 @@ import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.glassfish.jersey.internal.Errors;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +28,6 @@ public class ExperimentTreeTest {
 
 	private TardisClient client = null;
 	private Logger logger = LogManager.getLogger(this.getClass());
-	private ExperimentTree tree = null;
 
 	public String address = "130.220.210.149";
 	public String user = "admin";
@@ -64,26 +61,55 @@ public class ExperimentTreeTest {
 	 ****************/
 
 	@Test
-	public void testVerifyTree() {
+	public void testVerifyDatasetTree() {
+		logger.debug("start!");
+
+		// create data set
+		DatasetTree tree = new DatasetTree(client);
+		Dataset dataset = tree.getDataset();
+		assertNotNull("new dataset is null!", dataset);
+		assertNotNull("errors is null!");
+
+		// verify new data set - missing valid description
+		List<String> errors = tree.checkTree();
+		assertNotNull("new dataset: errors is null!", errors);
+		logger.debug("new dataset: errors = " + errors.toString());
+		assertFalse("new dataset: errors is not empty!", errors.isEmpty());
+		assertEquals("new dataset: error[0] not matched!",
+				"Dataset.description: is null.", errors.get(0));
+		
+		// set description
+		dataset.setDescription("Test Dataset");
+		tree.checkTree();
+		errors = tree.getErrors();
+		assertNotNull("valid desc: errors is null!", errors);
+		assertFalse("valid desc: errors is not empty!", errors.isEmpty());
+
+		// finished
+		return;
+	}
+
+	@Test
+	public void testVerifyExperimentTree() {
 		logger.debug("start!");
 
 		// create experiment
 		ExperimentTree tree = new ExperimentTree(client);
 		Experiment exp = tree.getExperiment();
 		assertNotNull("new experiment is null!", exp);
-		// check messages: required fields, including: title.
 		assertNotNull("errors is null!", tree.getErrors());
 
-		// verify
+		// verify new experiment
 		assertFalse("verify new experiment did not fail!", tree.verify());
 		assertFalse("errors is empty!", tree.getErrors().isEmpty());
 		assertEquals("errors length not matched!", Integer.valueOf(1),
 				Integer.valueOf(tree.getErrors().size()));
-		assertEquals("errors[0] not matched!", "Experiment.title: not found.",
-				tree.getErrors().get(0));
+		assertEquals("errors[0] not matched!", tree.getErrors().get(0),
+				"Experiment.title: cannot be \'No default provided.\'");
 
 		// check invalid fields not set
 		// createdBy, createdTime, id, publicAccess, resourceUri, updateTime.
+		exp.setTitle("");
 		exp.setCreatedBy("/api/v1/user/1/");
 		exp.setCreatedTime(client.formatDate(start));
 		exp.setId(1);
@@ -95,23 +121,27 @@ public class ExperimentTreeTest {
 		assertFalse("errors is empty!", tree.getErrors().isEmpty());
 		assertEquals("errors length not matched!", Integer.valueOf(7),
 				Integer.valueOf(tree.getErrors().size()));
-		assertEquals("errors[0] not matched!", 
-				"Experiment.title: not found.", tree.getErrors().get(0));
+		assertEquals("errors[0] not matched!", "Experiment.title: not found.",
+				tree.getErrors().get(0));
 		assertEquals("errors[1] not matched!",
 				"Experiment.created_by: is not null.", tree.getErrors().get(1));
-		assertEquals("errors[2] not matched!", 
-				"Experiment.created_time: is not null.", tree.getErrors().get(2));
-		assertEquals("errors[3] not matched!",
-				"Experiment.id: is not null.", tree.getErrors().get(3));
+		assertEquals("errors[2] not matched!",
+				"Experiment.created_time: is not null.", tree.getErrors()
+						.get(2));
+		assertEquals("errors[3] not matched!", "Experiment.id: is not null.",
+				tree.getErrors().get(3));
 		assertEquals("errors[4] not matched!",
-				"Experiment.public_access: invalid value = 2", tree.getErrors().get(4));
-		assertEquals("errors[5] not matched!", 
-				"Experiment.resource_uri: is not null.", tree.getErrors().get(5));
+				"Experiment.public_access: invalid value = 2", tree.getErrors()
+						.get(4));
+		assertEquals("errors[5] not matched!",
+				"Experiment.resource_uri: is not null.", tree.getErrors()
+						.get(5));
 		assertEquals("errors[6] not matched!",
-				"Experiment.updated_time: is not null.", tree.getErrors().get(6));
+				"Experiment.updated_time: is not null.", tree.getErrors()
+						.get(6));
 
-		// check values of available fields:   approved, description, endTime, 
-		//    handle, institutionName, locked, startTime, title, url.
+		// check values of available fields: approved, description, endTime,
+		// handle, institutionName, locked, startTime, title, url.
 		tree = new ExperimentTree(client);
 		exp = tree.getExperiment();
 		exp.setTitle("Test Available Fields.");
@@ -120,9 +150,52 @@ public class ExperimentTreeTest {
 		exp.setInstitutionName(null);
 		exp.setStartTime(null);
 		exp.setUrl(null);
-		
+		assertTrue("verify valid available fields not matched!", tree.verify());
+
+		// check URLs and URIs
+		exp.setHandle("dummy uri");
+		exp.setUrl("dummy url");
+		assertFalse("verify invalid urls did not fail!", tree.verify());
+		assertEquals("error count not matched!", Integer.valueOf(2),
+				Integer.valueOf(tree.getErrors().size()));
+		exp.setHandle("doi:10.1018/a.n.onymous.2014.03.001");
+		exp.setUrl("http://address.and.port/webapp/page");
+		assertTrue("verify valid urls failed!", tree.verify());
+
+		// check date times
+		exp.setStartTime("2014-01-01-01 13:53");
+		exp.setEndTime("2014-02-31 27:01");
+		assertFalse("verify invalid times did not fail!", tree.verify());
+		assertEquals("errors count not matched!", Integer.valueOf(2),
+				Integer.valueOf(tree.getErrors().size()));
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2014, 02, 31, 27, 32, 0);
+		exp.setStartTime(calendar.getTime());
+		assertFalse("verify invalid start date failed!", tree.verify());
+		calendar.set(2014, 02, 21, 16, 32, 0);
+		exp.setStartTime(calendar.getTime());
+		exp.setEndTime("2014-02-21T17:01:00");
+		assertTrue("verify valid dates failed!", tree.verify());
+
 		// check invalid parameters
-		// schemas or names.
+		String ns_server = "http://org.walroz.wsr/server";
+		String name = "host";
+		String value = "aServer";
+		// bad namespace
+		tree.addParameter("http://bad/schema", name, value);
+		assertFalse("verify invalid namespace failed!", tree.verify());
+		// bad name
+		tree.clearParameters();
+		tree.addParameter(ns_server, "badname", value);
+		assertFalse("verify invalid name failed!", tree.verify());
+		// bad value
+		tree.clearParameters();
+		tree.addParameter(ns_server, name, null);
+		assertFalse("verify invalid value failed!", tree.verify());
+		// valid parameter
+		tree.clearParameters();
+		tree.addParameter(ns_server, name, value);
+		assertTrue("verify valid parameter failed!", tree.verify());
 
 		// finished
 		return;
@@ -215,11 +288,12 @@ public class ExperimentTreeTest {
 				createdByUser.getResourceUri());
 
 		// build experiment tree
-		tree = this.buildExperiment(client);
+		ExperimentTree tree = this.buildExperiment(client);
 		tree.setDatasets(this.buildDatasets(client));
 
 		// post Experiment Tree
 		String uri = tree.post();
+		assertTrue("errors is not empty!", tree.getErrors().isEmpty());
 		assertNotNull("response uri is null!", uri);
 
 		// check created
@@ -260,11 +334,12 @@ public class ExperimentTreeTest {
 				+ ")");
 		experiment.setDescription("Experiment uploaded by myTardis API Client."
 				+ " See http://github.com/nrmay/mytardis-client");
-		Date now = new Date();
-		String created = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-				.format(now);
-		experiment.setCreatedTime(created);
 		experiment.setInstitutionName("RMIT University.");
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2014, 5, 12, 12, 54, 55);
+		experiment.setStartTime(client.formatDate(calendar.getTime()));
+		calendar.set(2014, 5, 12, 13, 6, 5);
+		experiment.setEndTime(client.formatDate(calendar.getTime()));
 
 		// build parameter sets
 		String ns_server = "http://org.walroz.wsr/server";

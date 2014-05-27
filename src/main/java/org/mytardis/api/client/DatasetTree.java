@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mytardis.api.model.Dataset;
+import org.mytardis.api.model.Experiment;
 
 /**
  * A representation of a dataset.
@@ -13,7 +14,7 @@ import org.mytardis.api.model.Dataset;
  * @author Nick may
  * @version 1.0
  */
-public class DatasetTree extends ParametersetContainer {
+public class DatasetTree extends TardisObjectContainer {
 
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private TardisClient client = null;
@@ -29,6 +30,68 @@ public class DatasetTree extends ParametersetContainer {
 	public DatasetTree(TardisClient client) {
 		super();
 		this.client = client;
+	}
+
+	/**
+	 * Check Tree for Errors.
+	 * 
+	 * @return List of error messages as Strings.
+	 * @throws Exception 
+	 */
+	public List<String> checkTree() {
+		logger.debug("start!");
+		this.clearErrors();
+		this.checkParametersetTree(client);
+
+		// check dataset
+		Dataset dataset = this.getDataset();
+		if (dataset == null) {
+			this.addError("Dataset: is null.");
+		} else {
+			if (dataset.getDescription() == null
+					|| dataset.getDescription().isEmpty()) {
+				logger.debug("Dataset.description = " + dataset.getDescription());
+				this.addError("Dataset.description: is null.");
+			}
+			if (dataset.getImmutable() == null) {
+				this.addError("Dataset.immutable: is null.");
+			}
+			if (dataset.getResourceUri() != null
+					&& !dataset.getResourceUri().isEmpty()
+					&& !dataset.getResourceUri().endsWith(
+							TardisClient.NO_DEFAULT_PROVIDED)) {
+				this.addError("Dataset.resourceUri: is not null.");
+			}
+			if (dataset.getExperiments() != null) {
+				if (!(dataset.getExperiments() instanceof List<?>)) {
+					this.addError("Dataset.experiments: is not a List.");
+				} else {
+					try {
+						@SuppressWarnings("unchecked")
+						List<String> uris = (List<String>) dataset
+								.getExperiments();
+						for (String uri : uris) {
+							Experiment experiment = (Experiment) client.getObjectByUri(Experiment.class, uri);
+							if (experiment == null) {
+								this.addError("Dataset.experiments: resource not found.");
+							}
+						}
+					} catch (ClassCastException e) {
+						this.addError("Dataset.experiments: is not a List of Strings.");
+					} catch (Exception e) {
+						this.addError("Dataset.experiments: failed to find a valid experiment for resourceUri.");;
+					}
+
+				}
+			}
+		}
+
+		// finished
+		logger.debug("errors count = " + this.getErrors().size());
+		if (this.getErrors().size() > 0) {
+			logger.debug("errors = " + this.getErrors().toString());
+		}
+		return this.getErrors();
 	}
 
 	/**
@@ -49,11 +112,11 @@ public class DatasetTree extends ParametersetContainer {
 							TardisObject.NO_DEFAULT)) {
 				this.target.setResourceUri("/api/v1/dataset/");
 			}
-			
+
 			// set properties
 			target.setExperiments(experiments);
 			target.setParameterSets(this.getParametersets());
-			
+
 			// post dataset
 			try {
 				datasetUri = client.postObject(target);
