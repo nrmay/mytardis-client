@@ -50,9 +50,14 @@ public class DatasetTree extends TardisObjectContainer {
 		} else {
 			if (dataset.getDescription() == null
 					|| dataset.getDescription().isEmpty()) {
-				logger.debug("Dataset.description = " + dataset.getDescription());
+				logger.debug("Dataset.description = "
+						+ dataset.getDescription());
 				this.addError("Dataset.description: is null.");
 			}
+			if (dataset.getId() != null) {
+				this.addError("Dataset.id: is not null!");
+			}
+
 			if (dataset.getImmutable() == null) {
 				this.addError("Dataset.immutable: is null.");
 			}
@@ -70,8 +75,10 @@ public class DatasetTree extends TardisObjectContainer {
 						@SuppressWarnings("unchecked")
 						List<String> uris = (List<String>) dataset
 								.getExperiments();
+						logger.debug("experimentUris = " + uris.toString());
 						for (String uri : uris) {
-							Experiment experiment = (Experiment) client.getObjectByUri(Experiment.class, uri);
+							Experiment experiment = (Experiment) client
+									.getObjectByUri(Experiment.class, uri);
 							if (experiment == null) {
 								this.addError("Dataset.experiments: resource not found.");
 							}
@@ -79,7 +86,8 @@ public class DatasetTree extends TardisObjectContainer {
 					} catch (ClassCastException e) {
 						this.addError("Dataset.experiments: is not a List of Strings.");
 					} catch (Exception e) {
-						this.addError("Dataset.experiments: failed to find a valid experiment for resourceUri.");;
+						this.addError("Dataset.experiments: failed to find a valid experiment for resourceUri.");
+						;
 					}
 
 				}

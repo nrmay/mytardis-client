@@ -61,6 +61,23 @@ public class ExperimentTreeTest {
 	 ****************/
 
 	@Test
+	public void testVerifyDatafileTree() {
+		logger.debug("start!");
+
+		// create data file
+		DatafileTree tree = new DatafileTree(client);
+		DatasetFile datafile = tree.getDatafile();
+		assertNotNull("new datasetfile is null!", datafile);
+		assertNotNull("errors is null", tree.getErrors());
+		assertTrue("errors is not empty", tree.getErrors().isEmpty());
+		
+		// check 
+
+		// finished
+		return;
+	}
+
+	@Test
 	public void testVerifyDatasetTree() {
 		logger.debug("start!");
 
@@ -68,7 +85,8 @@ public class ExperimentTreeTest {
 		DatasetTree tree = new DatasetTree(client);
 		Dataset dataset = tree.getDataset();
 		assertNotNull("new dataset is null!", dataset);
-		assertNotNull("errors is null!");
+		assertNotNull("errors is null!", tree.getErrors());
+		assertTrue("errors is not empty!", tree.getErrors().isEmpty());
 
 		// verify new data set - missing valid description
 		List<String> errors = tree.checkTree();
@@ -77,13 +95,53 @@ public class ExperimentTreeTest {
 		assertFalse("new dataset: errors is not empty!", errors.isEmpty());
 		assertEquals("new dataset: error[0] not matched!",
 				"Dataset.description: is null.", errors.get(0));
-		
+
 		// set description
 		dataset.setDescription("Test Dataset");
-		tree.checkTree();
-		errors = tree.getErrors();
+		errors = tree.checkTree();
 		assertNotNull("valid desc: errors is null!", errors);
-		assertFalse("valid desc: errors is not empty!", errors.isEmpty());
+		assertTrue("valid desc: errors is not empty!", errors.isEmpty());
+
+		// check invalid attributes
+		dataset.setId(2);
+		dataset.setResourceUri("/api/v1/dataset/9999/");
+		errors = tree.checkTree();
+		assertNotNull("invalids: errors is null!", errors);
+		assertFalse("invalids: errors is empty!", errors.isEmpty());
+		assertEquals("invalids: error count not matched!", Integer.valueOf(2),
+				Integer.valueOf(errors.size()));
+		dataset.setId(null);
+		dataset.setResourceUri("");
+		errors = tree.checkTree();
+		assertNotNull("invalids: errors is null!", errors);
+		assertTrue("invalids: errors is not empty!", errors.isEmpty());
+
+		// check available attributes - invalid
+		dataset.setDirectory("test folder 01");
+		List<Integer> ints = new ArrayList<Integer>();
+		ints.add(9999);
+		dataset.setExperiments(ints);
+		dataset.setImmutable(true);
+		errors = tree.checkTree();
+		assertNotNull("valids: errors is null!", errors);
+		assertFalse("valids: errors is empty!", errors.isEmpty());
+		assertEquals("valids: error count not matched!", Integer.valueOf(1),
+				Integer.valueOf(errors.size()));
+		List<String> strs = new ArrayList<String>();
+		strs.add("9999");
+		dataset.setExperiments(strs);
+		errors = tree.checkTree();
+		assertNotNull("valids: errors is null!", errors);
+		assertFalse("valids: errors is empty!", errors.isEmpty());
+		assertEquals("valids: error count not matched!", Integer.valueOf(1),
+				Integer.valueOf(errors.size()));
+		strs = new ArrayList<String>();
+		strs.add("/api/v1/experiment/104/");
+		strs.add("/api/v1/experiment/105/");
+		dataset.setExperiments(strs);
+		errors = tree.checkTree();
+		assertNotNull("valids: errors is null!", errors);
+		assertTrue("valids: errors is not empty!", errors.isEmpty());
 
 		// finished
 		return;
