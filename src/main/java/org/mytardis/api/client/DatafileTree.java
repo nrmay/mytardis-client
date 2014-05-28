@@ -2,6 +2,9 @@ package org.mytardis.api.client;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -70,8 +73,17 @@ public class DatafileTree extends TardisObjectContainer {
 							TardisObject.NO_DEFAULT)) {
 				this.target.setResourceUri("/api/v1/dataset_file/");
 			}
+			
+			// set create date
+			Calendar now = Calendar.getInstance();
+			target.setCreatedTime(client.formatDate(now.getTime()));
 
 			// get mime type
+			try {
+				logger.debug("probeContentType = " + Files.probeContentType(this.file.toPath()));
+			} catch (IOException ioe) {
+				logger.debug("failed to get content type with: " + ioe.getMessage());
+			}
 			String mimeType = new MimetypesFileTypeMap()
 					.getContentType(this.file);
 
@@ -79,6 +91,7 @@ public class DatafileTree extends TardisObjectContainer {
 			try {
 				FileInputStream fis = new FileInputStream(this.file);
 				target.setMd5sum(DigestUtils.md5Hex(fis));
+				target.setSha512sum(DigestUtils.sha512Hex(fis));
 			} catch (Exception ex) {
 				logger.debug("generate checksum failed with: "
 						+ ex.getMessage());
@@ -94,7 +107,8 @@ public class DatafileTree extends TardisObjectContainer {
 			try {
 				logger.debug("target datafile name[" + target.getFilename()
 						+ "] mimetype[" + target.getMimetype() 
-						+ "] checksum[" + target.getMd5sum() 
+						+ "] md5sum[" + target.getMd5sum() 
+						+ "] sha512sum[" + target.getMd5sum() 
 						+ "] size[" + target.getSize() + "]");
 
 				result = client.postMultipart(target, this.file);
