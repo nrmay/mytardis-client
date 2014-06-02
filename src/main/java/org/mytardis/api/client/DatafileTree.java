@@ -3,7 +3,11 @@ package org.mytardis.api.client;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -38,7 +42,6 @@ public class DatafileTree extends TardisObjectContainer {
 		this.client = client;
 	}
 
-
 	/**
 	 * Check Tree for Errors.
 	 * 
@@ -48,13 +51,13 @@ public class DatafileTree extends TardisObjectContainer {
 		logger.debug("start!");
 		this.clearErrors();
 		this.checkParametersetTree(client);
-		
+
 		// TODO: implement...
-		
+
 		// finished
 		return this.getErrors();
 	}
-	
+
 	/**
 	 * Post to myTardis
 	 * 
@@ -73,16 +76,18 @@ public class DatafileTree extends TardisObjectContainer {
 							TardisObject.NO_DEFAULT)) {
 				this.target.setResourceUri("/api/v1/dataset_file/");
 			}
-			
+
 			// set create date
 			Calendar now = Calendar.getInstance();
 			target.setCreatedTime(client.formatDate(now.getTime()));
 
 			// get mime type
 			try {
-				logger.debug("probeContentType = " + Files.probeContentType(this.file.toPath()));
+				logger.debug("probeContentType = "
+						+ Files.probeContentType(this.file.toPath()));
 			} catch (IOException ioe) {
-				logger.debug("failed to get content type with: " + ioe.getMessage());
+				logger.debug("failed to get content type with: "
+						+ ioe.getMessage());
 			}
 			String mimeType = new MimetypesFileTypeMap()
 					.getContentType(this.file);
@@ -96,20 +101,20 @@ public class DatafileTree extends TardisObjectContainer {
 				logger.debug("generate checksum failed with: "
 						+ ex.getMessage());
 			}
+			target.setMimetype(mimeType);
 
 			// set properties
 			target.setDataset(datasetUri);
 			target.setParameterSets(this.getParametersets());
-			target.setMimetype(mimeType);
 			target.setSize(Long.toString(this.file.length()));
 
 			// post dataset_file
 			try {
 				logger.debug("target datafile name[" + target.getFilename()
-						+ "] mimetype[" + target.getMimetype() 
-						+ "] md5sum[" + target.getMd5sum() 
-						+ "] sha512sum[" + target.getMd5sum() 
-						+ "] size[" + target.getSize() + "]");
+						+ "] mimetype[" + target.getMimetype() + "] md5sum["
+						+ target.getMd5sum() + "] sha512sum["
+						+ target.getMd5sum() + "] size[" + target.getSize()
+						+ "]");
 
 				result = client.postMultipart(target, this.file);
 				logger.debug("post datafile = " + result);
@@ -121,6 +126,33 @@ public class DatafileTree extends TardisObjectContainer {
 		// finished
 		return result;
 
+	}
+
+	/*******************
+	 * Private Methods *
+	 *******************/
+
+	private List<String> checkFilename(String filename) {
+		logger.debug("start!");
+		List<String> result = new ArrayList<String>();
+		
+		if (this.target != null) {
+			 
+			URL url = getClass().getResource("/" + filename);
+			File file = null;
+			try {
+				file = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				result.add("DataFile: get file failed with: " + e.getMessage());
+			}
+
+			
+		} else {
+			result.add("DatasetFile is null!");
+		}
+
+		// finished
+		return result;
 	}
 
 	/***********************

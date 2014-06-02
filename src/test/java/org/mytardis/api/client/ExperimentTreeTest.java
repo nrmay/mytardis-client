@@ -71,8 +71,33 @@ public class ExperimentTreeTest {
 		assertNotNull("errors is null", tree.getErrors());
 		assertTrue("errors is not empty", tree.getErrors().isEmpty());
 		
-		// check 
-
+		// verify new data file
+		List<String> errors = tree.checkTree();
+		assertNotNull("new datafile: errors is null!", errors);
+		logger.debug("new datafile: errors = " + errors.toString());
+		assertFalse("new datafile: errors is empty!", errors.isEmpty());
+		assertEquals("new datafile: errors count not matched!", Integer.valueOf(5)
+				, Integer.valueOf(errors.size()));
+		
+		// verify required
+		// TODO: filename, md5sum, mimetype, sha512sum, size.
+		//     : invalid
+		
+		//     : valid
+		
+		// verify required
+		
+		
+		// verify optional
+		// TODO: createdTime, directory
+		//     : invalid
+		
+		//     : valid
+		
+		
+		// verify invalid
+		// TODO: datafile, dataset, id, modificationTime, replicas, resourceUri
+		
 		// finished
 		return;
 	}
@@ -117,7 +142,7 @@ public class ExperimentTreeTest {
 		assertTrue("invalids: errors is not empty!", errors.isEmpty());
 
 		// check available attributes - invalid
-		dataset.setDirectory("test folder 01");
+		dataset.setDirectory("/experiment/test_folder_01");
 		List<Integer> ints = new ArrayList<Integer>();
 		ints.add(9999);
 		dataset.setExperiments(ints);
@@ -136,12 +161,14 @@ public class ExperimentTreeTest {
 		assertEquals("valids: error count not matched!", Integer.valueOf(1),
 				Integer.valueOf(errors.size()));
 		strs = new ArrayList<String>();
-		strs.add("/api/v1/experiment/104/");
-		strs.add("/api/v1/experiment/105/");
+		strs.add("/api/v1/experiment/10004/");
+		strs.add("/api/v1/experiment/10005/");
 		dataset.setExperiments(strs);
 		errors = tree.checkTree();
 		assertNotNull("valids: errors is null!", errors);
-		assertTrue("valids: errors is not empty!", errors.isEmpty());
+		assertFalse("valids: errors is not empty!", errors.isEmpty());
+		assertEquals("valids: error count not matched!", Integer.valueOf(2),
+				Integer.valueOf(errors.size()));
 
 		// finished
 		return;
