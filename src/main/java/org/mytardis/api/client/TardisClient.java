@@ -42,6 +42,12 @@ import org.mytardis.api.model.User;
 
 import com.google.gson.Gson;
 
+import eu.medsea.mimeutil.MimeUtil2;
+import eu.medsea.mimeutil.detector.ExtensionMimeDetector;
+import eu.medsea.mimeutil.detector.MagicMimeMimeDetector;
+import eu.medsea.mimeutil.detector.OpendesktopMimeDetector;
+import eu.medsea.mimeutil.detector.WindowsRegistryMimeDetector;
+
 /**
  * A client for the myTardis RESTful API.
  * 
@@ -53,9 +59,6 @@ public class TardisClient {
 
 	public static final String API_VERSION = "/api/v1";
 	public static final String NO_DEFAULT_PROVIDED = "No default provided.";
-	// public static final int PUBLIC_ACCESS_NONE = 1;
-	// public static final int PUBLIC_ACCESS_METADATA = 2;
-	// public static final int PUBLIC_ACCESS_FULL = 3;
 
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private Gson gson = new Gson();
@@ -65,6 +68,7 @@ public class TardisClient {
 	private URI uri = null;
 	private Integer limit = null;
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	private MimeUtil2 mimeUtil = null;
 
 	/**********************
 	 * Constructors *
@@ -459,6 +463,48 @@ public class TardisClient {
 		} catch (ParseException e) {
 			logger.debug("parse date[" + date + "] failed with: "
 					+ e.getMessage());
+		}
+
+		// finished
+		return result;
+	}
+
+	/**
+	 * Get the mime type of a file.
+	 * 
+	 * @param file
+	 *            : target.
+	 * @return Mime Type as a String.
+	 */
+	public String getMimeType(File file) {
+		logger.debug("start!");
+		String result = null;
+
+		try {
+			if (this.mimeUtil == null) {
+				this.mimeUtil = new MimeUtil2();
+				this.mimeUtil
+						.registerMimeDetector(OpendesktopMimeDetector.class
+								.getName());
+				this.mimeUtil.registerMimeDetector(MagicMimeMimeDetector.class
+						.getName());
+				this.mimeUtil.registerMimeDetector(ExtensionMimeDetector.class
+						.getName());
+				this.mimeUtil
+						.registerMimeDetector(WindowsRegistryMimeDetector.class
+								.getName());
+//				logger.debug("known mimeTypes: "
+//						+ MimeUtil2.getKnownMimeTypes().toString());
+			}
+			
+			result = MimeUtil2.getMostSpecificMimeType(
+					this.mimeUtil.getMimeTypes(file)).toString();
+
+			logger.debug("file[" + file.getName() + "] mimeType[" + result
+					+ "]");
+
+		} catch (Exception e) {
+			logger.debug("failed with: " + e.getMessage());
 		}
 
 		// finished

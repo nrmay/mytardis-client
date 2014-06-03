@@ -1,22 +1,27 @@
 package org.mytardis.api.client;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.file.Files;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-
-import javax.activation.MimetypesFileTypeMap;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mytardis.api.model.DatasetFile;
+
+import eu.medsea.mimeutil.MimeUtil2;
+import eu.medsea.mimeutil.detector.ExtensionMimeDetector;
+import eu.medsea.mimeutil.detector.MagicMimeMimeDetector;
+import eu.medsea.mimeutil.detector.OpendesktopMimeDetector;
+import eu.medsea.mimeutil.detector.WindowsRegistryMimeDetector;
 
 /**
  * A representation of a datafile.
@@ -52,7 +57,109 @@ public class DatafileTree extends TardisObjectContainer {
 		this.clearErrors();
 		this.checkParametersetTree(client);
 
-		// TODO: implement...
+		// check required attributes
+		// filename, md5sum, mimetype, sha12sum, size
+		if (target.getFilename() == null
+				|| target.getFilename().isEmpty()
+				|| target.getFilename()
+						.equals(TardisClient.NO_DEFAULT_PROVIDED)) {
+			this.addError("Datafile.filename: is missing!");
+		}
+		// expect at least one of md5sum or sha12sum
+		if ((target.getMd5sum() == null || target.getMd5sum().isEmpty())
+				&& (target.getSha512sum() == null || target.getSha512sum()
+						.isEmpty())) {
+			this.addError("Datafile.checksum: is missing - either md5sum and/or sha12sum.");
+		}
+		if (target.getMimetype() == null || target.getMimetype().isEmpty()) {
+			this.addError("Datafile.mimetype: is missing!");
+		}
+		if (target.getSize() == null || target.getSize().isEmpty()) {
+			this.addError("Datafile.size: is missing!");
+		}
+
+		// check file
+		try {
+			FileInputStream fis = new FileInputStream(this.file);
+			if (target.getMd5sum() != null && !target.getMd5sum().isEmpty()
+					&& !target.getMd5sum().equals(DigestUtils.md5Hex(fis))) {
+				this.addError("Datafile.md5sum: not matched!");
+			}
+			if (target.getSha512sum() != null
+					&& !target.getSha512sum().isEmpty()
+					&& !target.getSha512sum()
+							.equals(DigestUtils.sha512Hex(fis))) {
+				this.addError("Datafile.sha512sum: not matched!");
+			}
+			if (target.getMimetype() != null
+					&& !target.getMimetype().isEmpty()
+					&& !target.getMimetype().equals(
+							client.getMimeType(this.getFile()))) {
+				this.addError("Datafile.mimetype: not matched!");
+			}
+			if (target.getSize() != null
+					&& !target.getSize().isEmpty()
+					&& !target.getSize().equals(
+							Long.toString(this.getFile().length()))) {
+				this.addError("Datafile.size: not matched!");
+			}
+		} catch (NullPointerException e1) {
+			this.addError("Datafile.file: is null!");
+		} catch (FileNotFoundException e2) {
+			this.addError("Datafile.file: not found!");
+		} catch (IOException e3) {
+			this.addError("Datafile.file: not accessible!");
+		}
+
+		// check optional attributes
+		if (target.getCreatedTime() != null
+				&& target.getCreatedTime().getClass() != Date.class) {
+			try {
+				String datetime = (String) target.getCreatedTime();
+				if (!client.checkDate(datetime)) {
+					this.addError("Datafile.created_time: is invalid.");
+				}
+			} catch (Exception e) {
+				logger.debug(e.toString());
+				this.addError("Datafile.created_time: is invalid.");
+			}
+		}
+		if (target.getDirectory() != null && !target.getDirectory().isEmpty()) {
+			// check it is a valid path
+			try {
+				@SuppressWarnings("unused")
+				URI uri = new URI(target.getDirectory());
+			} catch (Exception e) {
+				logger.debug("failed with: " + e.getMessage());
+				this.addError("Datafile.directory: is not a valid path.");
+			}
+		}
+
+		// check excluded attributes
+		if (target.getDatafile() != null
+				&& !target.getDatafile().isEmpty()
+				&& !target.getDatafile().equals(
+						TardisClient.NO_DEFAULT_PROVIDED)) {
+			this.addError("Datafile.datafile: is not null!");
+		}
+		if (target.getDataset() != null) {
+			this.addError("Datafile.dataset: is not null!");
+		}
+		if (target.getModificationTime() != null) {
+			this.addError("Datafile.modificationTime: is not null!");
+		}
+		if (target.getParameterSets() != null) {
+			this.addError("Datafile.parameterSets: is not null!");
+		}
+		if (target.getReplicas() != null) {
+			this.addError("Datafile.replicas: is not null!");
+		}
+		if (target.getResourceUri() != null
+				&& !target.getResourceUri().isEmpty()
+				&& !target.getResourceUri().equals(
+						TardisClient.NO_DEFAULT_PROVIDED)) {
+			this.addError("Datafile.resourceUri: is not null!");
+		}
 
 		// finished
 		return this.getErrors();
@@ -69,7 +176,7 @@ public class DatafileTree extends TardisObjectContainer {
 		logger.debug("start!");
 		String result = null;
 
-		if (target != null) {
+		if (target != null && this.checkTree().isEmpty()) {
 			// set resourceUri
 			if (this.target.getResourceUri() != null
 					&& this.target.getResourceUri().equals(
@@ -77,36 +184,11 @@ public class DatafileTree extends TardisObjectContainer {
 				this.target.setResourceUri("/api/v1/dataset_file/");
 			}
 
-			// set create date
+			// set properties
 			Calendar now = Calendar.getInstance();
 			target.setCreatedTime(client.formatDate(now.getTime()));
-
-			// get mime type
-			try {
-				logger.debug("probeContentType = "
-						+ Files.probeContentType(this.file.toPath()));
-			} catch (IOException ioe) {
-				logger.debug("failed to get content type with: "
-						+ ioe.getMessage());
-			}
-			String mimeType = new MimetypesFileTypeMap()
-					.getContentType(this.file);
-
-			// get md5 checksum
-			try {
-				FileInputStream fis = new FileInputStream(this.file);
-				target.setMd5sum(DigestUtils.md5Hex(fis));
-				target.setSha512sum(DigestUtils.sha512Hex(fis));
-			} catch (Exception ex) {
-				logger.debug("generate checksum failed with: "
-						+ ex.getMessage());
-			}
-			target.setMimetype(mimeType);
-
-			// set properties
 			target.setDataset(datasetUri);
 			target.setParameterSets(this.getParametersets());
-			target.setSize(Long.toString(this.file.length()));
 
 			// post dataset_file
 			try {
@@ -117,38 +199,42 @@ public class DatafileTree extends TardisObjectContainer {
 						+ "]");
 
 				result = client.postMultipart(target, this.file);
-				logger.debug("post datafile = " + result);
+				logger.debug("post datafile: resourceUri = " + result);
 			} catch (Exception e) {
-				logger.debug("post dataset failed with: " + e.getMessage());
+				logger.debug("post datafile: failed with - " + e.getMessage());
 			}
 		}
 
 		// finished
 		return result;
-
 	}
 
-	/*******************
-	 * Private Methods *
-	 *******************/
-
-	private List<String> checkFilename(String filename) {
+	/**
+	 * Set the file attributes from the target file.
+	 * 
+	 * @return List of errors as Strings
+	 */
+	public List<String> setFileAttributes() {
 		logger.debug("start!");
 		List<String> result = new ArrayList<String>();
-		
-		if (this.target != null) {
-			 
-			URL url = getClass().getResource("/" + filename);
-			File file = null;
+
+		if (this.file != null) {
+			// get md5 checksum
 			try {
-				file = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				result.add("DataFile: get file failed with: " + e.getMessage());
+				FileInputStream fis = new FileInputStream(this.file);
+				target.setMd5sum(DigestUtils.md5Hex(fis));
+				target.setSha512sum(DigestUtils.sha512Hex(fis));
+			} catch (Exception ex) {
+				result.add("generate checksums failed with: " + ex.getMessage());
 			}
 
-			
+			// get mime type
+			target.setMimetype(client.getMimeType(this.file));
+
+			// get file size
+			target.setSize(Long.toString(this.file.length()));
 		} else {
-			result.add("DatasetFile is null!");
+			result.add("file is null!");
 		}
 
 		// finished
@@ -161,6 +247,7 @@ public class DatafileTree extends TardisObjectContainer {
 
 	/**
 	 * Get the DatasetFile Object.
+	 * 
 	 * @return DatasetFile
 	 */
 	public DatasetFile getDatafile() {
@@ -169,7 +256,9 @@ public class DatafileTree extends TardisObjectContainer {
 
 	/**
 	 * Set the DatasetFile Object.
-	 * @param datafile : DatasetFile instance.
+	 * 
+	 * @param datafile
+	 *            : DatasetFile instance.
 	 */
 	public void setDatafile(DatasetFile datafile) {
 		this.target = datafile;
@@ -177,6 +266,7 @@ public class DatafileTree extends TardisObjectContainer {
 
 	/**
 	 * Get the File associated with this DatasetFile object.
+	 * 
 	 * @return File
 	 */
 	public File getFile() {
@@ -185,10 +275,13 @@ public class DatafileTree extends TardisObjectContainer {
 
 	/**
 	 * Set the File associated with the DatasetFile object.
-	 * @param file : File instance.
+	 * 
+	 * @param file
+	 *            : File instance.
 	 */
 	public void setFile(File file) {
 		this.file = file;
+		this.setFileAttributes();
 	}
 
 }

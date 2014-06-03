@@ -35,7 +35,7 @@ public abstract class TardisObjectContainer {
 	 *            : as a String.
 	 */
 	public void addError(String error) {
-		logger.debug("start!");
+//		logger.debug("start!");
 		if (error != null) {
 			this.errors.add(error);
 		}

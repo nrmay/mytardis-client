@@ -45,7 +45,43 @@ public class ExperimentTree extends TardisObjectContainer {
 
 	/**
 	 * Verify the experiment, data set and data file trees. Error messages are
-	 * written to the errors attribute.
+	 * written to the errors attribute. The following table describes the
+	 * required and optional attributes:
+	 * 
+	 * <table style="border-bottom-style: blue 1px solid;">
+	 * <tr style="border-bottom: blue 1px solid; vertical-align: top; align: left;">
+	 * <th>Tree</th>
+	 * <th>Required</th>
+	 * <th>Optional</th>
+	 * </tr>
+	 * <tr style="border-bottom: 1px solid; vertical-align: top;">
+	 * <td>Experiment</td>
+	 * <td>Title (String)</td>
+	 * <td>
+	 * Description (String) </br>
+	 * EndTime (Date) </br>
+	 * Handle (URI) </br>
+	 * InstitutionName (String)</br>
+	 * StartTime (Date) </br>
+	 * URL (URL)</td>
+	 * </tr>
+	 * <tr style="border-bottom: 1px solid; vertical-align: top;">
+	 * <td>Dataset</td>
+	 * <td>Description (String)</td>
+	 * <td>
+	 * Directory (URI) </br>
+	 * Experiments (List<URI>) </br>
+	 * Immutable (Boolean)</td>
+	 * </tr>
+	 * <tr style="border-bottom: blue 1px solid; vertical-align: top;">
+	 * <td>Datafile</td>
+	 * <td>File (File) </br>
+	 * Filename (String)</td>
+	 * <td>
+	 * CreatedTime (Date) </br>
+	 * Directory (URI)</td>
+	 * </tr>
+	 * </table>
 	 * 
 	 * @return boolean : true if no errors.
 	 */

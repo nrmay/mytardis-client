@@ -12,5 +12,8 @@
 		<Logger name="org.mytardis" level="debug" additivity="false">
 			<AppenderRef ref="Console" />
 		</Logger>
+		<Logger name="eu.medsea.mimeutil" level="error" additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
 	</Loggers>
 </Configuration>

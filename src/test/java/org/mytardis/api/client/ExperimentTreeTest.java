@@ -61,6 +61,44 @@ public class ExperimentTreeTest {
 	 ****************/
 
 	@Test
+	public void testGetMimeType() {
+		logger.debug("start!");
+
+		// create data file
+		DatafileTree tree = new DatafileTree(client);
+		DatasetFile datafile = tree.getDatafile();
+		assertNotNull("new datasetfile is null!", datafile);
+		assertNotNull("errors is null", tree.getErrors());
+		assertTrue("errors is not empty", tree.getErrors().isEmpty());
+
+		// xml file
+		File file = this.getFile("results(1).xml");
+		assertNotNull("target file is null!", file);
+		String mimeType = client.getMimeType(file);
+		assertNotNull("mimeType is null!", mimeType);
+		assertEquals("mimeType not matched!", "text/xml", mimeType);
+
+		// composite file
+		file = this.getFile("group(1).composite");
+		assertNotNull("target file is null!", file);
+		mimeType = client.getMimeType(file);
+		assertNotNull("mimeType is null!", mimeType);
+		assertEquals("mimeType not matched!", "application/octet-stream",
+				mimeType);
+
+		// json file
+		file = this.getFile("schema/user.json");
+		assertNotNull("target file is null!", file);
+		mimeType = client.getMimeType(file);
+		assertNotNull("mimeType is null!", mimeType);
+		assertEquals("mimeType not matched!", "application/octet-stream",
+				mimeType);
+
+		// finished
+		return;
+	}
+
+	@Test
 	public void testVerifyDatafileTree() {
 		logger.debug("start!");
 
@@ -70,34 +108,90 @@ public class ExperimentTreeTest {
 		assertNotNull("new datasetfile is null!", datafile);
 		assertNotNull("errors is null", tree.getErrors());
 		assertTrue("errors is not empty", tree.getErrors().isEmpty());
-		
+
 		// verify new data file
 		List<String> errors = tree.checkTree();
 		assertNotNull("new datafile: errors is null!", errors);
 		logger.debug("new datafile: errors = " + errors.toString());
 		assertFalse("new datafile: errors is empty!", errors.isEmpty());
-		assertEquals("new datafile: errors count not matched!", Integer.valueOf(5)
-				, Integer.valueOf(errors.size()));
-		
-		// verify required
-		// TODO: filename, md5sum, mimetype, sha512sum, size.
-		//     : invalid
-		
-		//     : valid
-		
-		// verify required
-		
-		
-		// verify optional
-		// TODO: createdTime, directory
-		//     : invalid
-		
-		//     : valid
-		
-		
-		// verify invalid
-		// TODO: datafile, dataset, id, modificationTime, replicas, resourceUri
-		
+		assertEquals("new datafile: errors count not matched!",
+				Integer.valueOf(5), Integer.valueOf(errors.size()));
+
+		// required attributes
+		// -------------------
+		// file, filename, md5sum, mimetype, sha512sum, size.
+		// : valid file but invalid attributes
+		File file = this.getFile("results(1).xml");
+		tree.setFile(file);
+		datafile.setMd5sum("somejunk");
+		datafile.setSha512sum("alsojunk");
+		datafile.setMimetype("marcel/marceau");
+		datafile.setSize("12345");
+		errors = tree.checkTree();
+		assertNotNull("new datafile: errors is null!", errors);
+		logger.debug("new datafile: errors = " + errors.toString());
+		assertFalse("new datafile: errors is empty!", errors.isEmpty());
+		assertEquals("new datafile: errors count not matched!",
+				Integer.valueOf(5), Integer.valueOf(errors.size()));
+		// : valid file and attributes
+		tree.setFileAttributes();
+		datafile.setFilename(file.getName());
+		errors = tree.checkTree();
+		assertNotNull("new datafile: errors is null!", errors);
+		logger.debug("new datafile: errors = " + errors.toString());
+		assertTrue("new datafile: errors is not empty!", errors.isEmpty());
+
+		// optional attributes
+		// -------------------
+		// createdTime, directory
+		// : invalid
+		datafile.setCreatedTime(new String("dummyTime"));
+		datafile.setDirectory("**%%***///rubbish///****");
+		errors = tree.checkTree();
+		assertNotNull("new datafile: errors is null!", errors);
+		logger.debug("new datafile: errors = " + errors.toString());
+		assertFalse("new datafile: errors is empty!", errors.isEmpty());
+		assertEquals("new datafile: errors count not matched!",
+				Integer.valueOf(2), Integer.valueOf(errors.size()));
+		// : valid
+		datafile.setCreatedTime(this.start);
+		datafile.setDirectory("iteration#01");
+		errors = tree.checkTree();
+		assertNotNull("new datafile: errors is null!", errors);
+		logger.debug("new datafile: errors = " + errors.toString());
+		assertTrue("new datafile: errors is not empty!", errors.isEmpty());
+
+		// forbidden attributes
+		// --------------------
+		// datafile, dataset, id, modificationTime, parameterSets, replicas,
+		// resourceUri
+		// : invalid
+		datafile.setDatafile("datafile01");
+		datafile.setDataset("dataset01");
+		datafile.setId(102);
+		datafile.setModificationTime(this.end);
+		datafile.setReplicas(new String("some string"));
+		datafile.setResourceUri("/api/v1/datafile/102");
+		datafile.setParameterSets(new ArrayList<ParametersetTree>());
+		errors = tree.checkTree();
+		assertNotNull("new datafile: errors is null!", errors);
+		logger.debug("new datafile: errors = " + errors.toString());
+		assertFalse("new datafile: errors is empty!", errors.isEmpty());
+		assertEquals("new datafile: errors count not matched!",
+				Integer.valueOf(6), Integer.valueOf(errors.size()));
+		// : valid
+		datafile.setDatafile(null);
+		datafile.setDataset(null);
+		datafile.setId(null);
+		datafile.setModificationTime(null);
+		datafile.setReplicas(null);
+		datafile.setResourceUri(null);
+		datafile.setParameterSets(null);
+		errors = tree.checkTree();
+		assertNotNull("new datafile: errors is null!", errors);
+		logger.debug("new datafile: errors = " + errors.toString());
+		assertTrue("new datafile: errors is not empty!", errors.isEmpty());
+
 		// finished
 		return;
 	}
@@ -121,13 +215,17 @@ public class ExperimentTreeTest {
 		assertEquals("new dataset: error[0] not matched!",
 				"Dataset.description: is null.", errors.get(0));
 
-		// set description
+		// required attributes
+		// -------------------
+		// description
 		dataset.setDescription("Test Dataset");
 		errors = tree.checkTree();
 		assertNotNull("valid desc: errors is null!", errors);
 		assertTrue("valid desc: errors is not empty!", errors.isEmpty());
 
-		// check invalid attributes
+		// forbidden attributes
+		// --------------------
+		// id, resourceUri
 		dataset.setId(2);
 		dataset.setResourceUri("/api/v1/dataset/9999/");
 		errors = tree.checkTree();
@@ -141,7 +239,10 @@ public class ExperimentTreeTest {
 		assertNotNull("invalids: errors is null!", errors);
 		assertTrue("invalids: errors is not empty!", errors.isEmpty());
 
-		// check available attributes - invalid
+		// optional attributes
+		// -------------------
+		// directory, experiments, immutable
+		// : invalid
 		dataset.setDirectory("/experiment/test_folder_01");
 		List<Integer> ints = new ArrayList<Integer>();
 		ints.add(9999);
@@ -192,9 +293,19 @@ public class ExperimentTreeTest {
 		assertEquals("errors[0] not matched!", tree.getErrors().get(0),
 				"Experiment.title: cannot be \'No default provided.\'");
 
-		// check invalid fields not set
+		// required attributes
+		// -------------------
+		// title.
+		tree = new ExperimentTree(client);
+		exp = tree.getExperiment();
+		exp.setTitle("Test Available Fields.");
+		List<String> errors = tree.checkTree();
+		assertNotNull("requireds: errors is null!", errors);
+		assertTrue("requireds: errors is not empty!", errors.isEmpty());
+
+		// forbidden attributes
+		// --------------------
 		// createdBy, createdTime, id, publicAccess, resourceUri, updateTime.
-		exp.setTitle("");
 		exp.setCreatedBy("/api/v1/user/1/");
 		exp.setCreatedTime(client.formatDate(start));
 		exp.setId(1);
@@ -204,29 +315,29 @@ public class ExperimentTreeTest {
 		// verify
 		assertFalse("verify invalid fields did not fail!", tree.verify());
 		assertFalse("errors is empty!", tree.getErrors().isEmpty());
-		assertEquals("errors length not matched!", Integer.valueOf(7),
+		assertEquals("errors length not matched!", Integer.valueOf(6),
 				Integer.valueOf(tree.getErrors().size()));
-		assertEquals("errors[0] not matched!", "Experiment.title: not found.",
-				tree.getErrors().get(0));
+		assertEquals("errors[0] not matched!",
+				"Experiment.created_by: is not null.", tree.getErrors().get(0));
 		assertEquals("errors[1] not matched!",
-				"Experiment.created_by: is not null.", tree.getErrors().get(1));
-		assertEquals("errors[2] not matched!",
 				"Experiment.created_time: is not null.", tree.getErrors()
-						.get(2));
-		assertEquals("errors[3] not matched!", "Experiment.id: is not null.",
-				tree.getErrors().get(3));
-		assertEquals("errors[4] not matched!",
+						.get(1));
+		assertEquals("errors[2] not matched!", "Experiment.id: is not null.",
+				tree.getErrors().get(2));
+		assertEquals("errors[3] not matched!",
 				"Experiment.public_access: invalid value = 2", tree.getErrors()
+						.get(3));
+		assertEquals("errors[4] not matched!",
+				"Experiment.resource_uri: is not null.", tree.getErrors()
 						.get(4));
 		assertEquals("errors[5] not matched!",
-				"Experiment.resource_uri: is not null.", tree.getErrors()
-						.get(5));
-		assertEquals("errors[6] not matched!",
 				"Experiment.updated_time: is not null.", tree.getErrors()
-						.get(6));
+						.get(5));
 
-		// check values of available fields: approved, description, endTime,
-		// handle, institutionName, locked, startTime, title, url.
+		// optional attributes
+		// -------------------
+		// approved, description, endTime, handle, institutionName, locked,
+		// startTime, title, url.
 		tree = new ExperimentTree(client);
 		exp = tree.getExperiment();
 		exp.setTitle("Test Available Fields.");
@@ -234,10 +345,12 @@ public class ExperimentTreeTest {
 		exp.setHandle(null);
 		exp.setInstitutionName(null);
 		exp.setStartTime(null);
+		exp.setEndTime(null);
 		exp.setUrl(null);
-		assertTrue("verify valid available fields not matched!", tree.verify());
+		assertTrue("verify valid optional fields not matched!", tree.verify());
 
 		// check URLs and URIs
+		// -------------------
 		exp.setHandle("dummy uri");
 		exp.setUrl("dummy url");
 		assertFalse("verify invalid urls did not fail!", tree.verify());
@@ -248,6 +361,7 @@ public class ExperimentTreeTest {
 		assertTrue("verify valid urls failed!", tree.verify());
 
 		// check date times
+		// ----------------
 		exp.setStartTime("2014-01-01-01 13:53");
 		exp.setEndTime("2014-02-31 27:01");
 		assertFalse("verify invalid times did not fail!", tree.verify());
@@ -262,7 +376,8 @@ public class ExperimentTreeTest {
 		exp.setEndTime("2014-02-21T17:01:00");
 		assertTrue("verify valid dates failed!", tree.verify());
 
-		// check invalid parameters
+		// check parameters
+		// ----------------
 		String ns_server = "http://org.walroz.wsr/server";
 		String name = "host";
 		String value = "aServer";
