@@ -57,7 +57,7 @@ import eu.medsea.mimeutil.detector.WindowsRegistryMimeDetector;
  */
 public class TardisClient {
 
-	public static final String API_VERSION = "/api/v1";
+	public static final String API_VERSION_1 = "/api/v1";
 	public static final String NO_DEFAULT_PROVIDED = "No default provided.";
 
 	private Logger logger = LogManager.getLogger(this.getClass());
@@ -95,7 +95,7 @@ public class TardisClient {
 
 		// set up tardis uri
 		try {
-			this.uri = new URI("http://" + address);
+			this.uri = new URI("http://" + this.address);
 		} catch (URISyntaxException e) {
 			logger.error("failed to create tardis url with: " + e.getMessage());
 		}
@@ -290,7 +290,7 @@ public class TardisClient {
 
 		// make request
 		WebTarget target = this.buildWebTarget(null);
-		Response response = target.path(TardisClient.API_VERSION)
+		Response response = target.path(TardisClient.API_VERSION_1)
 				.path(TardisObject.path(clazz)).path(id.toString())
 				.queryParam("format", "json").request().get();
 
@@ -376,9 +376,9 @@ public class TardisClient {
 					+ response.getHeaderString("location"));
 			String location = response.getHeaderString("location");
 			if (location != null) {
-				if (location.contains(TardisClient.API_VERSION)) {
-					String[] parts = location.split(TardisClient.API_VERSION);
-					result = TardisClient.API_VERSION + parts[parts.length - 1];
+				if (location.contains(TardisClient.API_VERSION_1)) {
+					String[] parts = location.split(TardisClient.API_VERSION_1);
+					result = TardisClient.API_VERSION_1 + parts[parts.length - 1];
 				}
 			}
 		}
@@ -437,9 +437,9 @@ public class TardisClient {
 					+ response.getHeaderString("location"));
 			String location = response.getHeaderString("location");
 			if (location != null) {
-				if (location.contains(TardisClient.API_VERSION)) {
-					String[] parts = location.split(TardisClient.API_VERSION);
-					result = TardisClient.API_VERSION + parts[parts.length - 1];
+				if (location.contains(TardisClient.API_VERSION_1)) {
+					String[] parts = location.split(TardisClient.API_VERSION_1);
+					result = TardisClient.API_VERSION_1 + parts[parts.length - 1];
 				}
 			}
 		}
@@ -553,10 +553,10 @@ public class TardisClient {
 
 		if (meta != null && meta.getNext() != null) {
 			String path = meta.getNext().split("\\?")[0];
-			if (path.startsWith(TardisClient.API_VERSION)) {
+			if (path.startsWith(TardisClient.API_VERSION_1)) {
 				result = result.path(path);
 			} else {
-				result = result.path(TardisClient.API_VERSION).path(path);
+				result = result.path(TardisClient.API_VERSION_1).path(path);
 			}
 			if (meta.getLimit() != null && meta.getLimit() > 0) {
 				result = result.queryParam("limit", meta.getLimit());

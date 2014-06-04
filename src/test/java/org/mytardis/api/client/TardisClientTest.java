@@ -118,7 +118,7 @@ public class TardisClientTest {
 			logger.debug("response.resourUri = " + uri);
 			assertNotNull("uri is null!", uri);
 			assertTrue("uri not an experiment resource!",
-					uri.contains(TardisClient.API_VERSION + "/experiment/"));
+					uri.contains(TardisClient.API_VERSION_1 + "/experiment/"));
 		} catch (Exception e) {
 			fail("post experiment failed with: " + e.getMessage());
 		}
@@ -237,9 +237,9 @@ public class TardisClientTest {
 	@Test
 	public void testVersion() {
 		logger.debug("start!");
-		assertNotNull("TardisClient.version is null!", TardisClient.API_VERSION);
+		assertNotNull("TardisClient.version is null!", TardisClient.API_VERSION_1);
 		assertEquals("TardisClient.version not matched!", this.expectedVersion,
-				TardisClient.API_VERSION);
+				TardisClient.API_VERSION_1);
 		// finished
 		return;
 	}

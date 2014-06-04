@@ -5,9 +5,57 @@
 <title>MyTardis API - Java Client</title>
 </head>
 <body>
-@author Nick May.
-@version 1.0
-<p>
-To be implemented...
+	<p>
+	This package implements a Java client for the 
+	<a href="http://mytardis.org">MyTardis</a> API. 
+	It contains two sub-packages:
+	</p>
+	
+	<h3>org.mytardis.api.client</h3>
+		<p>
+		Includes the classes for <b>building</b>, <b>posting</b>, and 
+		<b>retrieving</b> objects from MyTardis.
+		</p>
+		<p>		
+		Experiments are built using the 
+		{@link org.mytardis.api.client.ExperimentTree}, 
+		{@link org.mytardis.api.client.DatasetTree}, and 
+		{@link org.mytardis.api.client.DatafileTree} classes---each of which 
+		can have associated meta-data parameters. 
+		Trees take a {@link org.mytardis.api.client.TardisClient} instance 
+		as a constructor parameter---which handles the interaction with the 
+		MyTardis RESTful interface. 
+		</p>
+		<p>
+		Trees can be validated individually using an associated 
+		<b>checkTree()</b> method. Alternatively, the 
+		{@link org.mytardis.api.client.ExperimentTree#verify} method can be 
+		used to execute all <b>checkTree()</b> methods in an experiment and 
+		aggregate any errors that they generate. This <b>verify()</b> method 
+		must validate successfully---with no errors---for the 
+		{@link org.mytardis.api.client.ExperimentTree#post} method to push the 
+		experiment, datasets, and datafiles to the MyTardis system. 
+		See {@link org.mytardis.api.client.ExperimentTree#verify} for details of 
+		which attributes are required and which are optional for each tree. 
+		</p>
+		<p>
+		A {@link org.mytardis.api.client.TardisClient} can be used to retrieve 
+		{@link org.mytardis.api.client.TardisObject} instances for a given 
+		model, either as a list or individually---by <emph>Id</emph> or 
+		<emph>ResourceURI</emph>.
+		
+	<h3>org.mytardis.api.model</h3>
+		<p>
+		Includes the object models generated from the MyTardis API schema. 
+		Objects are generated using the 
+		<a href="http://www.jsonschema2pojo.org/">jsonschema2pojo</a> utility, 
+		using the following parameters: <b>source type</b> is "JSON", and 
+		<b>annotation style</b> is "Gson".
+		</p>
+		
+	
+	@author Nick May. 
+	
+	@version 1.0
 </body>
 </html>
