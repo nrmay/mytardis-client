@@ -6,6 +6,12 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.google.gson.annotations.Expose;
 
+/**
+ * A meta-data parameter.
+ * @author Nick
+ * @version 1.0
+ *
+ */
 public class Parameter {
 	
 	@Expose

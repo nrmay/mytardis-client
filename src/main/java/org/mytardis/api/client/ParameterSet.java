@@ -10,11 +10,11 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import com.google.gson.annotations.Expose;
 
 /**
- * A representation of a parameter set and parameters.
+ * A set of meta-data parameters.
  * @author Nick May
  * @version 1.0
  */
-public class ParametersetTree {
+public class ParameterSet {
 	
 	@Expose
 	private String schema = null;
@@ -25,7 +25,7 @@ public class ParametersetTree {
 	 * Default Constructor.
 	 * @param schema : the namespace of the schema.
 	 */
-	public ParametersetTree(String schema) {
+	public ParameterSet(String schema) {
 		super();
 		this.schema = schema;
 	}

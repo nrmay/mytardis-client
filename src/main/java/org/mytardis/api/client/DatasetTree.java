@@ -14,7 +14,7 @@ import org.mytardis.api.model.Experiment;
  * @author Nick may
  * @version 1.0
  */
-public class DatasetTree extends TardisObjectContainer {
+public class DatasetTree extends ParameterSetContainer {
 
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private TardisClient client = null;

@@ -18,10 +18,10 @@ import org.mytardis.api.model.Schema;
  * @version 1.0
  * 
  */
-public abstract class TardisObjectContainer {
+public abstract class ParameterSetContainer {
 
 	private Logger logger = LogManager.getLogger(this.getClass());
-	private Map<String, ParametersetTree> parametersets = new HashMap<String, ParametersetTree>();
+	private Map<String, ParameterSet> parametersets = new HashMap<String, ParameterSet>();
 	private List<String> errors = new ArrayList<String>();
 
 	/******************
@@ -81,7 +81,7 @@ public abstract class TardisObjectContainer {
 	public void clearParameters() {
 		logger.debug("start!");
 
-		this.parametersets = new HashMap<String, ParametersetTree>();
+		this.parametersets = new HashMap<String, ParameterSet>();
 
 		// finished
 		return;
@@ -98,9 +98,9 @@ public abstract class TardisObjectContainer {
 	 *            : the parameter value.
 	 */
 	public void addParameter(String namespace, String name, String value) {
-		ParametersetTree tree = parametersets.get(namespace);
+		ParameterSet tree = parametersets.get(namespace);
 		if (tree == null) {
-			tree = new ParametersetTree(namespace);
+			tree = new ParameterSet(namespace);
 			this.parametersets.put(namespace, tree);
 		}
 		tree.addParameter(name, value);
@@ -114,8 +114,8 @@ public abstract class TardisObjectContainer {
 	 * 
 	 * @return List of ParametersetTree
 	 */
-	public List<ParametersetTree> getParametersets() {
-		return new ArrayList<ParametersetTree>(parametersets.values());
+	public List<ParameterSet> getParametersets() {
+		return new ArrayList<ParameterSet>(parametersets.values());
 	}
 
 	/**
@@ -127,7 +127,7 @@ public abstract class TardisObjectContainer {
 	public void checkParametersetTree(TardisClient client) {
 		logger.debug("start!");
 		
-		for (ParametersetTree tree : this.getParametersets()) {
+		for (ParameterSet tree : this.getParametersets()) {
 			// get schema and parameter names
 			String namespace = tree.getSchema();
 			Schema schema = client.getSchema(namespace);

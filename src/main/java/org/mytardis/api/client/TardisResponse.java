@@ -18,7 +18,7 @@ public class TardisResponse<T extends TardisObject> {
 
 	@SerializedName("meta")
 	@Expose
-	private Meta meta;
+	private TardisMeta meta;
 
 	@SerializedName("objects")
 	@Expose
@@ -28,7 +28,7 @@ public class TardisResponse<T extends TardisObject> {
 	 * Get the response meta object.
 	 * @return Meta
 	 */
-	public Meta getMeta() {
+	public TardisMeta getMeta() {
 		return meta;
 	}
 
@@ -36,7 +36,7 @@ public class TardisResponse<T extends TardisObject> {
 	 * Set the response meta object.
 	 * @param meta : the object containing the response meta-data.
 	 */
-	public void setMeta(Meta meta) {
+	public void setMeta(TardisMeta meta) {
 		this.meta = meta;
 	}
 

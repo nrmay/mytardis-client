@@ -1,7 +1,5 @@
 package org.mytardis.api.client;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,19 +15,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mytardis.api.model.DatasetFile;
 
-import eu.medsea.mimeutil.MimeUtil2;
-import eu.medsea.mimeutil.detector.ExtensionMimeDetector;
-import eu.medsea.mimeutil.detector.MagicMimeMimeDetector;
-import eu.medsea.mimeutil.detector.OpendesktopMimeDetector;
-import eu.medsea.mimeutil.detector.WindowsRegistryMimeDetector;
-
 /**
  * A representation of a datafile.
  * 
  * @author Nick May
  * @version 1.0
  */
-public class DatafileTree extends TardisObjectContainer {
+public class DatafileTree extends ParameterSetContainer {
 
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private TardisClient client = null;
@@ -198,7 +190,7 @@ public class DatafileTree extends TardisObjectContainer {
 						+ target.getMd5sum() + "] size[" + target.getSize()
 						+ "]");
 
-				result = client.postMultipart(target, this.file);
+				result = client.postObjectAndFile(target, this.file);
 				logger.debug("post datafile: resourceUri = " + result);
 			} catch (Exception e) {
 				logger.debug("post datafile: failed with - " + e.getMessage());
@@ -210,7 +202,9 @@ public class DatafileTree extends TardisObjectContainer {
 	}
 
 	/**
-	 * Set the file attributes from the target file.
+	 * Set the file attributes from the target file, including; 
+	 * <b>filename</b>, <b>mimetype</b>, <b>size</b>, and <b>checksums</b> 
+	 * (md5sum and sha512sum).
 	 * 
 	 * @return List of errors as Strings
 	 */
@@ -219,6 +213,9 @@ public class DatafileTree extends TardisObjectContainer {
 		List<String> result = new ArrayList<String>();
 
 		if (this.file != null) {
+			// filename
+			target.setFilename(this.file.getName());
+
 			// get md5 checksum
 			try {
 				FileInputStream fis = new FileInputStream(this.file);
@@ -274,7 +271,8 @@ public class DatafileTree extends TardisObjectContainer {
 	}
 
 	/**
-	 * Set the File associated with the DatasetFile object.
+	 * Set the File associated with the DatasetFile object,
+	 * and set its associated attributes.
 	 * 
 	 * @param file
 	 *            : File instance.

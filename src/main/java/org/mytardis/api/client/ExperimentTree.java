@@ -13,13 +13,13 @@ import org.apache.logging.log4j.Logger;
 import org.mytardis.api.model.Experiment;
 
 /**
- * A representation of an Experiment.
+ * A representation of an experiment.
  * 
  * @author Nick May
  * @version 1.0
  * 
  */
-public class ExperimentTree extends TardisObjectContainer {
+public class ExperimentTree extends ParameterSetContainer {
 
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private TardisClient client = null;
@@ -45,16 +45,19 @@ public class ExperimentTree extends TardisObjectContainer {
 
 	/**
 	 * Verify the experiment, data set and data file trees. Error messages are
-	 * written to the errors attribute. The following table describes the
-	 * required and optional attributes:
-	 * 
-	 * <table style="border-bottom-style: blue 1px solid;">
-	 * <tr style="border-bottom: blue 1px solid; vertical-align: top; align: left;">
+	 * written to the errors attribute. 
+	 * <p>
+	 * The following table describes the required and optional attributes:
+	 * <table style="border-collapse: collapse; width: 80%; border: 1px solid gray; margin-left: 10%;">
+	 * <thead>
+	 * <tr style="background-color: lightgray; color: black; font-size: 125%;">
 	 * <th>Tree</th>
 	 * <th>Required</th>
 	 * <th>Optional</th>
 	 * </tr>
-	 * <tr style="border-bottom: 1px solid; vertical-align: top;">
+	 * </thead>
+	 * <tbody>
+	 * <tr style="border-bottom: 1px solid silver; vertical-align: top;">
 	 * <td>Experiment</td>
 	 * <td>Title (String)</td>
 	 * <td>
@@ -65,7 +68,7 @@ public class ExperimentTree extends TardisObjectContainer {
 	 * StartTime (Date) </br>
 	 * URL (URL)</td>
 	 * </tr>
-	 * <tr style="border-bottom: 1px solid; vertical-align: top;">
+	 * <tr style="border-bottom: 1px solid silver; vertical-align: top;">
 	 * <td>Dataset</td>
 	 * <td>Description (String)</td>
 	 * <td>
@@ -73,7 +76,7 @@ public class ExperimentTree extends TardisObjectContainer {
 	 * Experiments (List<URI>) </br>
 	 * Immutable (Boolean)</td>
 	 * </tr>
-	 * <tr style="border-bottom: blue 1px solid; vertical-align: top;">
+	 * <tr style="border-bottom: 1px solid silver; vertical-align: top;">
 	 * <td>Datafile</td>
 	 * <td>File (File) </br>
 	 * Filename (String)</td>
@@ -81,6 +84,7 @@ public class ExperimentTree extends TardisObjectContainer {
 	 * CreatedTime (Date) </br>
 	 * Directory (URI)</td>
 	 * </tr>
+	 * </tbody>
 	 * </table>
 	 * 
 	 * @return boolean : true if no errors.

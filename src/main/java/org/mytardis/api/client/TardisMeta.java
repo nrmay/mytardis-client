@@ -14,7 +14,7 @@ import com.google.gson.annotations.SerializedName;
  * @version 1.0
  *
  */
-public class Meta {
+public class TardisMeta {
 
 	@SerializedName("limit")
 	@Expose

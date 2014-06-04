@@ -78,11 +78,11 @@ public class TardisClient {
 	 * TardisClient default constructor.
 	 * 
 	 * @param address
-	 *            : domain---or ip address---and port of the myTardis server.
+	 *             domain---or ip address---and port of the myTardis server.
 	 * @param username
-	 *            : authentication user.
+	 *             authentication user.
 	 * @param passwd
-	 *            : authentication password.
+	 *             authentication password.
 	 */
 	public TardisClient(String address, String username, String passwd) {
 		super();
@@ -129,8 +129,8 @@ public class TardisClient {
 	/**
 	 * Get list of Parameternames by Schema
 	 * 
-	 * @param namespace
-	 * @return List<Paramtername>
+	 * @param namespace of schema.
+	 * @return List of Parametername objects.
 	 */
 	public List<Parametername> getParameternames(String namespace) {
 		logger.debug("start!");
@@ -161,8 +161,8 @@ public class TardisClient {
 	/**
 	 * Get an Schema by Namespace
 	 * 
-	 * @param namespace
-	 * @return schema
+	 * @param namespace of schema.
+	 * @return schema object.
 	 */
 	public Schema getSchema(String namespace) {
 		logger.debug("start!");
@@ -220,7 +220,7 @@ public class TardisClient {
 	 *            extends TardisObject.
 	 * @return List of TardisObjects.
 	 * @throws Exception
-	 *             : thrown when an invalid response is returned.
+	 *              thrown when an invalid response is returned.
 	 */
 	public <T extends TardisObject> List<T> getObjects(Class<T> clazz)
 			throws Exception {
@@ -228,7 +228,7 @@ public class TardisClient {
 		List<T> result = new ArrayList<T>();
 
 		// create request meta
-		Meta meta = new Meta();
+		TardisMeta meta = new TardisMeta();
 		meta.setNext(TardisObject.path(clazz));
 		if (this.limit != null && this.limit > 0) {
 			meta.setLimit(this.limit);
@@ -275,12 +275,13 @@ public class TardisClient {
 	 * Get an Object by Id
 	 * 
 	 * @param clazz
-	 *            : of the object.
+	 *              of the object.
 	 * @param id
-	 *            : of the object.
-	 * @return TardisObject : of the required class.
+	 *              of the object.
+	 * @return TardisObject 
+	 * 				of the required class.
 	 * @throws Exception
-	 *             : thrown if the object is not found.
+	 *              thrown if the object is not found.
 	 */
 	public <T extends TardisObject> TardisObject getObjectById(Class<T> clazz,
 			Integer id) throws Exception {
@@ -305,12 +306,13 @@ public class TardisClient {
 	 * Get an Object by URI
 	 * 
 	 * @param clazz
-	 *            : of the object.
+	 *              of the object.
 	 * @param uri
-	 *            : of the object as a String.
-	 * @return TardisObject : of the required class.
+	 *              of the object as a String.
+	 * @return TardisObject 
+	 *				of the required class.
 	 * @throws Exception
-	 *             : thrown if the object is not found.
+	 *              thrown if the object is not found.
 	 */
 	public <T extends TardisObject> TardisObject getObjectByUri(Class<T> clazz,
 			String uri) throws Exception {
@@ -335,17 +337,21 @@ public class TardisClient {
 	 ****************/
 
 	/**
-	 * Post the object to Tardis.
+	 * Post an object to Tardis.
 	 * 
-	 * @param object
-	 *            : TardisObject
+	 * @param object 
+	 * 					a TardisObject
+	 * @return String 	
+	 * 					the object's resource URI.
+	 * @throws Exception 
+	 * 					on a failed request.
 	 */
 	public String postObject(TardisObject object) throws Exception {
 		logger.debug("start! json = " + gson.toJson(object));
 		String result = null;
 
 		// create meta
-		Meta meta = new Meta();
+		TardisMeta meta = new TardisMeta();
 		if (object != null && object.getResourceUri() != null) {
 			meta.setNext(object.getResourceUri());
 		} else {
@@ -380,13 +386,25 @@ public class TardisClient {
 		return result;
 	}
 
-	public String postMultipart(TardisObject object, File file)
+	/**
+	 * Post an object and file to Tardis.
+	 * 
+	 * @param object 
+	 * 					a DatasetFile.
+	 * @param file 	
+	 * 					the file to be uploaded.
+	 * @return String 
+	 * 					the object's resource URI.
+	 * @throws Exception 
+	 * 					on a failed request.
+	 */
+	public String postObjectAndFile(DatasetFile object, File file)
 			throws Exception {
 		logger.debug("start! json = " + gson.toJson(object));
 		String result = null;
 
 		// create meta
-		Meta meta = new Meta();
+		TardisMeta meta = new TardisMeta();
 		if (object != null && object.getResourceUri() != null) {
 			meta.setNext(object.getResourceUri());
 		} else {
@@ -438,8 +456,9 @@ public class TardisClient {
 	 * Format Date object to Tardis Format.
 	 * 
 	 * @param date
-	 *            : Date
-	 * @return String : in format 'yyyy-MM-ddTHH:mm:ss'
+	 *            	Date
+	 * @return String 
+	 * 				in format 'yyyy-MM-ddTHH:mm:ss'
 	 */
 	public String formatDate(Date date) {
 		return this.sdf.format(date);
@@ -449,8 +468,9 @@ public class TardisClient {
 	 * Check the String for a valid Date.
 	 * 
 	 * @param date
-	 *            : as a String.
-	 * @return True only if the date parses successfully.
+	 *            	 as a String.
+	 * @return True 
+	 * 				only if the date parses successfully.
 	 */
 	public boolean checkDate(String date) {
 		logger.debug("start!");
@@ -473,8 +493,9 @@ public class TardisClient {
 	 * Get the mime type of a file.
 	 * 
 	 * @param file
-	 *            : target.
-	 * @return Mime Type as a String.
+	 *            	 target.
+	 * @return MimeType 
+	 * 				as a String.
 	 */
 	public String getMimeType(File file) {
 		logger.debug("start!");
@@ -493,10 +514,10 @@ public class TardisClient {
 				this.mimeUtil
 						.registerMimeDetector(WindowsRegistryMimeDetector.class
 								.getName());
-//				logger.debug("known mimeTypes: "
-//						+ MimeUtil2.getKnownMimeTypes().toString());
+				//				logger.debug("known mimeTypes: "
+				//						+ MimeUtil2.getKnownMimeTypes().toString());
 			}
-			
+
 			result = MimeUtil2.getMostSpecificMimeType(
 					this.mimeUtil.getMimeTypes(file)).toString();
 
@@ -515,7 +536,7 @@ public class TardisClient {
 	 * Private Methods *
 	 *******************/
 
-	private WebTarget buildWebTarget(Meta meta) {
+	private WebTarget buildWebTarget(TardisMeta meta) {
 		logger.debug("start! meta[" + meta + "]");
 		WebTarget result = null;
 
@@ -590,38 +611,41 @@ public class TardisClient {
 		return this.uri;
 	}
 
+//	/**
+//	 * @return myTardis server address.
+//	 */
+//	public String getAddress() {
+//		return address;
+//	}
+//
+//	/**
+//	 * @return Authentication password.
+//	 */
+//	public String getPass() {
+//		return pass;
+//	}
+//
+//	/**
+//	 * @return Authentication username.
+//	 */
+//	public String getUser() {
+//		return user;
+//	}
+//
 	/**
-	 * @return myTardis server address.
-	 */
-	public String getAddress() {
-		return address;
-	}
-
-	/**
-	 * @return authentication password.
-	 */
-	public String getPass() {
-		return pass;
-	}
-
-	/**
-	 * @return authentication username.
-	 */
-	public String getUser() {
-		return user;
-	}
-
-	/**
-	 * @return page limit.
+	 * Get the Tardis Respnse page limit.
+	 * @return Integer
+	 * 			page limit.
 	 */
 	public Integer getLimit() {
 		return limit;
 	}
 
 	/**
-	 * Set page limit
+	 * Set Tardis Response page limit
 	 * 
 	 * @param limit
+	 * 				as an Integer.
 	 */
 	public void setLimit(Integer limit) {
 		this.limit = limit;

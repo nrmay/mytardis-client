@@ -132,7 +132,7 @@ public class ExperimentTreeTest {
 		logger.debug("new datafile: errors = " + errors.toString());
 		assertFalse("new datafile: errors is empty!", errors.isEmpty());
 		assertEquals("new datafile: errors count not matched!",
-				Integer.valueOf(5), Integer.valueOf(errors.size()));
+				Integer.valueOf(4), Integer.valueOf(errors.size()));
 		// : valid file and attributes
 		tree.setFileAttributes();
 		datafile.setFilename(file.getName());
@@ -172,7 +172,7 @@ public class ExperimentTreeTest {
 		datafile.setModificationTime(this.end);
 		datafile.setReplicas(new String("some string"));
 		datafile.setResourceUri("/api/v1/datafile/102");
-		datafile.setParameterSets(new ArrayList<ParametersetTree>());
+		datafile.setParameterSets(new ArrayList<ParameterSet>());
 		errors = tree.checkTree();
 		assertNotNull("new datafile: errors is null!", errors);
 		logger.debug("new datafile: errors = " + errors.toString());
