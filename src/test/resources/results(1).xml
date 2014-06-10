@@ -1,3 +1,4 @@
+<wsr:results>
 <wsr:metadata xmlns:wsr="http://redundancy.walroz.org/ns/wsr/1.0"><wsr:start>1398614893826</wsr:start><wsr:end>1398617072861</wsr:end><wsr:runtime>2179035</wsr:runtime><wsr:server>130.56.248.116:8080</wsr:server><wsr:version>0.6</wsr:version><wsr:testcase>BoundingTimeTestImpl</wsr:testcase></wsr:metadata>
 <wsr:server-data xmlns:wsr="http://redundancy.walroz.org/ns/wsr/1.0"><wsr:cpu_arch>x86_64</wsr:cpu_arch><wsr:cpu_model>Intel Xeon E312xx (Sandy Bridge)</wsr:cpu_model><wsr:host>wsrserver2</wsr:host><wsr:os>CentOS</wsr:os><wsr:osarch>x86_64</wsr:osarch><wsr:os_family>RedHat</wsr:os_family><wsr:osrelease>6.5</wsr:osrelease><wsr:num_cpus>1</wsr:num_cpus><wsr:mem_total>3959</wsr:mem_total></wsr:server-data>
 <wsr:message xmlns:wsr="http://redundancy.walroz.org/ns/wsr/1.0"><wsr:boundingTime>827</wsr:boundingTime><wsr:runTime>231</wsr:runTime><wsr:code>RSP</wsr:code><wsr:content>P4</wsr:content><wsr:cost>3</wsr:cost><wsr:uuid>a678469f-c2f4-406c-8388-150603d30895</wsr:uuid><wsr:uri>Consumer1</wsr:uri><wsr:count>25</wsr:count></wsr:message>
@@ -2064,4 +2065,4 @@
 <wsr:message xmlns:wsr="http://redundancy.walroz.org/ns/wsr/1.0"><wsr:boundingTime>325</wsr:boundingTime><wsr:runTime>120</wsr:runTime><wsr:code>RSP</wsr:code><wsr:content>P3</wsr:content><wsr:cost>5</wsr:cost><wsr:uuid>3e9fb764-30ae-457e-a370-d424c8d7573b</wsr:uuid><wsr:uri>Consumer1</wsr:uri><wsr:count>47</wsr:count></wsr:message>
 <wsr:message xmlns:wsr="http://redundancy.walroz.org/ns/wsr/1.0"><wsr:boundingTime>43</wsr:boundingTime><wsr:runTime>72</wsr:runTime><wsr:code>DEC</wsr:code><wsr:content>timed out!</wsr:content><wsr:cost>3</wsr:cost><wsr:uuid>5eb6cda3-6909-4801-a2ac-8e278932d8f1</wsr:uuid><wsr:uri>Consumer1</wsr:uri><wsr:count>42</wsr:count></wsr:message>
 <wsr:message xmlns:wsr="http://redundancy.walroz.org/ns/wsr/1.0"><wsr:boundingTime>315</wsr:boundingTime><wsr:runTime>147</wsr:runTime><wsr:code>RSP</wsr:code><wsr:content>P7</wsr:content><wsr:cost>3</wsr:cost><wsr:uuid>c1aedf6e-e939-42bb-8301-8edb2cefc57f</wsr:uuid><wsr:uri>Consumer1</wsr:uri><wsr:count>42</wsr:count></wsr:message>
-
+</wsr:results>
