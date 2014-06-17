@@ -172,9 +172,12 @@ public class TardisClient {
 		try {
 			schemas = this.getObjects(Schema.class);
 			if (schemas != null) {
+				logger.debug("schemas.count = " + schemas.size());
 				for (Schema item : schemas) {
-					if (item.getNamespace().toString().equals(namespace)) {
+					if (item.getNamespace().equals(namespace)) {
 						result = item;
+						logger.debug("schema[" + result.getNamespace()
+								+ "] found! param.count = ");
 						break;
 					}
 				}

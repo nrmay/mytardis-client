@@ -73,16 +73,17 @@ public class DatafileTree extends ParameterSetContainer {
 		// check file
 		try {
 			FileInputStream fis = new FileInputStream(this.file);
-			if (target.getMd5sum() != null && !target.getMd5sum().isEmpty()
+			if (target.getMd5sum() != null 
+					&& !target.getMd5sum().isEmpty()
 					&& !target.getMd5sum().equals(DigestUtils.md5Hex(fis))) {
 				this.addError("Datafile.md5sum: not matched!");
 			}
-			if (target.getSha512sum() != null
-					&& !target.getSha512sum().isEmpty()
-					&& !target.getSha512sum()
-							.equals(DigestUtils.sha512Hex(fis))) {
-				this.addError("Datafile.sha512sum: not matched!");
-			}
+//			if (target.getSha512sum() != null
+//					&& !target.getSha512sum().isEmpty()
+//					&& !target.getSha512sum()
+//							.equals(DigestUtils.sha512Hex(fis))) {
+//				this.addError("Datafile.sha512sum: not matched!");
+//			}
 			if (target.getMimetype() != null
 					&& !target.getMimetype().isEmpty()
 					&& !target.getMimetype().equals(
@@ -220,7 +221,7 @@ public class DatafileTree extends ParameterSetContainer {
 			try {
 				FileInputStream fis = new FileInputStream(this.file);
 				target.setMd5sum(DigestUtils.md5Hex(fis));
-				target.setSha512sum(DigestUtils.sha512Hex(fis));
+//				target.setSha512sum(DigestUtils.sha512Hex(fis));
 			} catch (Exception ex) {
 				result.add("generate checksums failed with: " + ex.getMessage());
 			}
