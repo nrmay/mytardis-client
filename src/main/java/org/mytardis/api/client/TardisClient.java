@@ -614,29 +614,8 @@ public class TardisClient {
 		return this.uri;
 	}
 
-//	/**
-//	 * @return myTardis server address.
-//	 */
-//	public String getAddress() {
-//		return address;
-//	}
-//
-//	/**
-//	 * @return Authentication password.
-//	 */
-//	public String getPass() {
-//		return pass;
-//	}
-//
-//	/**
-//	 * @return Authentication username.
-//	 */
-//	public String getUser() {
-//		return user;
-//	}
-//
 	/**
-	 * Get the Tardis Respnse page limit.
+	 * Get the Tardis Response page limit.
 	 * @return Integer
 	 * 			page limit.
 	 */

@@ -35,7 +35,7 @@ public abstract class ParameterSetContainer {
 	 *            : as a String.
 	 */
 	public void addError(String error) {
-//		logger.debug("start!");
+		//		logger.debug("start!");
 		if (error != null) {
 			this.errors.add(error);
 		}
@@ -97,14 +97,16 @@ public abstract class ParameterSetContainer {
 	 * @param value
 	 *            : the parameter value.
 	 */
-	public void addParameter(String namespace, String name, String value) {
-		ParameterSet tree = parametersets.get(namespace);
-		if (tree == null) {
-			tree = new ParameterSet(namespace);
-			this.parametersets.put(namespace, tree);
+	public void addParameter(String namespace, String name, Object value) {
+		if (value != null && value.toString() != null
+				&& !value.toString().isEmpty()) {
+			ParameterSet tree = parametersets.get(namespace);
+			if (tree == null) {
+				tree = new ParameterSet(namespace);
+				this.parametersets.put(namespace, tree);
+			}
+			tree.addParameter(name, value.toString());
 		}
-		tree.addParameter(name, value);
-
 		// finished
 		return;
 	}
@@ -126,7 +128,7 @@ public abstract class ParameterSetContainer {
 	 */
 	public void checkParametersetTree(TardisClient client) {
 		logger.debug("start!");
-		
+
 		for (ParameterSet tree : this.getParametersets()) {
 			// get schema and parameter names
 			String namespace = tree.getSchema();
