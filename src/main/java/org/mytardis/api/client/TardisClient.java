@@ -8,7 +8,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -69,6 +71,7 @@ public class TardisClient {
 	private Integer limit = null;
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private MimeUtil2 mimeUtil = null;
+	private Set<String> errors = new HashSet<String>();
 
 	/**********************
 	 * Constructors *
@@ -78,11 +81,11 @@ public class TardisClient {
 	 * TardisClient default constructor.
 	 * 
 	 * @param address
-	 *             domain---or ip address---and port of the myTardis server.
+	 *            domain---or ip address---and port of the myTardis server.
 	 * @param username
-	 *             authentication user.
+	 *            authentication user.
 	 * @param passwd
-	 *             authentication password.
+	 *            authentication password.
 	 */
 	public TardisClient(String address, String username, String passwd) {
 		super();
@@ -129,7 +132,8 @@ public class TardisClient {
 	/**
 	 * Get list of Parameternames by Schema
 	 * 
-	 * @param namespace of schema.
+	 * @param namespace
+	 *            of schema.
 	 * @return List of Parametername objects.
 	 */
 	public List<Parametername> getParameternames(String namespace) {
@@ -161,13 +165,15 @@ public class TardisClient {
 	/**
 	 * Get an Schema by Namespace
 	 * 
-	 * @param namespace of schema.
+	 * @param namespace
+	 *            of schema.
 	 * @return schema object.
 	 */
 	public Schema getSchema(String namespace) {
 		logger.debug("start!");
 		Schema result = null;
-
+		this.clearErrors();
+		
 		List<Schema> schemas;
 		try {
 			schemas = this.getObjects(Schema.class);
@@ -183,7 +189,9 @@ public class TardisClient {
 				}
 			}
 		} catch (Exception e) {
-			logger.debug("get schema failed with: " + e.getMessage());
+			String message = "get schema failed with: " + e.getMessage();
+			logger.debug(message);
+			this.addError(message);
 		}
 
 		// finished
@@ -223,7 +231,7 @@ public class TardisClient {
 	 *            extends TardisObject.
 	 * @return List of TardisObjects.
 	 * @throws Exception
-	 *              thrown when an invalid response is returned.
+	 *             thrown when an invalid response is returned.
 	 */
 	public <T extends TardisObject> List<T> getObjects(Class<T> clazz)
 			throws Exception {
@@ -278,13 +286,12 @@ public class TardisClient {
 	 * Get an Object by Id
 	 * 
 	 * @param clazz
-	 *              of the object.
+	 *            of the object.
 	 * @param id
-	 *              of the object.
-	 * @return TardisObject 
-	 * 				of the required class.
+	 *            of the object.
+	 * @return TardisObject of the required class.
 	 * @throws Exception
-	 *              thrown if the object is not found.
+	 *             thrown if the object is not found.
 	 */
 	public <T extends TardisObject> TardisObject getObjectById(Class<T> clazz,
 			Integer id) throws Exception {
@@ -309,13 +316,12 @@ public class TardisClient {
 	 * Get an Object by URI
 	 * 
 	 * @param clazz
-	 *              of the object.
+	 *            of the object.
 	 * @param uri
-	 *              of the object as a String.
-	 * @return TardisObject 
-	 *				of the required class.
+	 *            of the object as a String.
+	 * @return TardisObject of the required class.
 	 * @throws Exception
-	 *              thrown if the object is not found.
+	 *             thrown if the object is not found.
 	 */
 	public <T extends TardisObject> TardisObject getObjectByUri(Class<T> clazz,
 			String uri) throws Exception {
@@ -342,12 +348,11 @@ public class TardisClient {
 	/**
 	 * Post an object to Tardis.
 	 * 
-	 * @param object 
-	 * 					a TardisObject
-	 * @return String 	
-	 * 					the object's resource URI.
-	 * @throws Exception 
-	 * 					on a failed request.
+	 * @param object
+	 *            a TardisObject
+	 * @return String the object's resource URI.
+	 * @throws Exception
+	 *             on a failed request.
 	 */
 	public String postObject(TardisObject object) throws Exception {
 		logger.debug("start! json = " + gson.toJson(object));
@@ -381,7 +386,8 @@ public class TardisClient {
 			if (location != null) {
 				if (location.contains(TardisClient.API_VERSION_1)) {
 					String[] parts = location.split(TardisClient.API_VERSION_1);
-					result = TardisClient.API_VERSION_1 + parts[parts.length - 1];
+					result = TardisClient.API_VERSION_1
+							+ parts[parts.length - 1];
 				}
 			}
 		}
@@ -392,14 +398,13 @@ public class TardisClient {
 	/**
 	 * Post an object and file to Tardis.
 	 * 
-	 * @param object 
-	 * 					a DatasetFile.
-	 * @param file 	
-	 * 					the file to be uploaded.
-	 * @return String 
-	 * 					the object's resource URI.
-	 * @throws Exception 
-	 * 					on a failed request.
+	 * @param object
+	 *            a DatasetFile.
+	 * @param file
+	 *            the file to be uploaded.
+	 * @return String the object's resource URI.
+	 * @throws Exception
+	 *             on a failed request.
 	 */
 	public String postObjectAndFile(DatasetFile object, File file)
 			throws Exception {
@@ -442,7 +447,8 @@ public class TardisClient {
 			if (location != null) {
 				if (location.contains(TardisClient.API_VERSION_1)) {
 					String[] parts = location.split(TardisClient.API_VERSION_1);
-					result = TardisClient.API_VERSION_1 + parts[parts.length - 1];
+					result = TardisClient.API_VERSION_1
+							+ parts[parts.length - 1];
 				}
 			}
 		}
@@ -459,9 +465,8 @@ public class TardisClient {
 	 * Format Date object to Tardis Format.
 	 * 
 	 * @param date
-	 *            	Date
-	 * @return String 
-	 * 				in format 'yyyy-MM-ddTHH:mm:ss'
+	 *            Date
+	 * @return String in format 'yyyy-MM-ddTHH:mm:ss'
 	 */
 	public String formatDate(Date date) {
 		return this.sdf.format(date);
@@ -471,9 +476,8 @@ public class TardisClient {
 	 * Check the String for a valid Date.
 	 * 
 	 * @param date
-	 *            	 as a String.
-	 * @return True 
-	 * 				only if the date parses successfully.
+	 *            as a String.
+	 * @return True only if the date parses successfully.
 	 */
 	public boolean checkDate(String date) {
 		logger.debug("start!");
@@ -496,9 +500,8 @@ public class TardisClient {
 	 * Get the mime type of a file.
 	 * 
 	 * @param file
-	 *            	 target.
-	 * @return MimeType 
-	 * 				as a String.
+	 *            target.
+	 * @return MimeType as a String.
 	 */
 	public String getMimeType(File file) {
 		logger.debug("start!");
@@ -517,8 +520,8 @@ public class TardisClient {
 				this.mimeUtil
 						.registerMimeDetector(WindowsRegistryMimeDetector.class
 								.getName());
-				//				logger.debug("known mimeTypes: "
-				//						+ MimeUtil2.getKnownMimeTypes().toString());
+				// logger.debug("known mimeTypes: "
+				// + MimeUtil2.getKnownMimeTypes().toString());
 			}
 
 			result = MimeUtil2.getMostSpecificMimeType(
@@ -576,6 +579,7 @@ public class TardisClient {
 
 	private void checkResponse(Response response) throws Exception {
 		logger.debug("response = " + response.toString());
+		this.clearErrors();
 		if (response.getStatus() == 401) {
 			// unauthorized
 			String password = this.pass;
@@ -598,9 +602,23 @@ public class TardisClient {
 			throw new Exception(message);
 		} else {
 			// other
-			logger.error("response status[" + response.getStatus()
-					+ "] not ok!");
+			String message = "response status[" + response.getStatus()
+					+ "] not ok!";
+			logger.error(message);
+			this.addError(message);
 		}
+	}
+
+	private void clearErrors() {
+		errors = new HashSet<String>();
+		return;
+	}
+
+	private void addError(String error) {
+		if (error != null && !error.isEmpty()) {
+			errors.add(error);
+		}
+		return;
 	}
 
 	/***********************
@@ -616,8 +634,8 @@ public class TardisClient {
 
 	/**
 	 * Get the Tardis Response page limit.
-	 * @return Integer
-	 * 			page limit.
+	 * 
+	 * @return Integer page limit.
 	 */
 	public Integer getLimit() {
 		return limit;
@@ -627,9 +645,19 @@ public class TardisClient {
 	 * Set Tardis Response page limit
 	 * 
 	 * @param limit
-	 * 				as an Integer.
+	 *            as an Integer.
 	 */
 	public void setLimit(Integer limit) {
 		this.limit = limit;
 	}
+
+	/**
+	 * Get set of error messages.
+	 * 
+	 * @return set of Strings.
+	 */
+	public Set<String> getErrors() {
+		return errors;
+	}
+
 }

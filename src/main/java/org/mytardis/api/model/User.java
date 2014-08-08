@@ -20,8 +20,10 @@ import org.mytardis.api.client.TardisObject;
  */
 @Generated("org.jsonschema2pojo")
 public class User extends TardisObject {
-
-    @SerializedName("first_name")
+	
+	@Expose
+    private Integer id;
+	@SerializedName("first_name")
     @Expose
     private String firstName;
     @SerializedName("last_name")
@@ -32,6 +34,14 @@ public class User extends TardisObject {
     private String resourceUri = "No default provided.";
     @Expose
     private String username = "No default provided.";
+    
+    public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
 
     public String getFirstName() {
         return firstName;
