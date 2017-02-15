@@ -477,14 +477,14 @@ public class TardisClientTest {
 		String uri = "/api/v1/dataset_file/1/";
 		
 		// retrieve the content of a Datasetfile by Id
-		String result = null;
+		byte[] result = null;
 		try {
 			result = client.getDatasetFileContentById(id);
 		} catch (Exception e) {
 			fail("valid credentials threw an exception: " + e.getMessage());
 		}
 		assertNotNull("datasetfile content is null!", result);
-		assertFalse("datasetfile content is empty!", result.isEmpty());
+		assertTrue("datasetfile content is empty!", result.length > 0);
 
 		
 		// retrieve the content of a Datasetfile by URI
@@ -495,7 +495,7 @@ public class TardisClientTest {
 			fail("valid credentials threw an exception: " + e.getMessage());
 		}
 		assertNotNull("datasetfile content is null!", result);
-		assertFalse("datasetfile content is empty!", result.isEmpty());
+		assertTrue("datasetfile content is empty!", result.length > 0);
 		
 		// finished
 		return;
