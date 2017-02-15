@@ -367,13 +367,13 @@ public class TardisClient {
 	 * 
 	 * @param id
 	 *            of the DatasetFile.
-	 * @return content of the required DatasetFile as a String.
+	 * @return binary content of the required DatasetFile.
 	 * @throws Exception
 	 *             thrown if the object is not found.
 	 */
-	public String getDatasetFileContentById(Integer id) throws Exception {
+	public byte[] getDatasetFileContentById(Integer id) throws Exception {
 		logger.debug("start!");
-		String result = null;
+		byte[] result = null;
 
 		// make request
 		WebTarget target = this.buildWebTarget(null);
@@ -384,10 +384,11 @@ public class TardisClient {
 
 		// check response
 		this.checkResponse(response);
-		result = response.readEntity(String.class);
-
+		
+		result = response.readEntity(byte[].class);
+        
 		// finished
-		return result;
+	    return result;
 	}
 	
 	/**
@@ -395,13 +396,13 @@ public class TardisClient {
 	 * 
 	 * @param uri
 	 *            of the object as a String.
-	 * @return content of the required DatasetFile as a String.
+	 * @return binary content of the required DatasetFile.
 	 * @throws Exception
 	 *             thrown if the object is not found.
 	 */
-	public String getDatasetFileContentByUri(String uri) throws Exception {
+	public byte[] getDatasetFileContentByUri(String uri) throws Exception {
 		logger.debug("start!");
-		String result = null;
+		byte[] result = null;
 
 		// make request
 		WebTarget target = this.buildWebTarget(null);
@@ -410,8 +411,9 @@ public class TardisClient {
 		
 		// check response
 		this.checkResponse(response);
-		result = response.readEntity(String.class);
-
+		
+		result = response.readEntity(byte[].class);
+        
 		// finished
 		return result;
 	}
