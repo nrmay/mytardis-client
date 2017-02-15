@@ -60,10 +60,13 @@ import eu.medsea.mimeutil.detector.WindowsRegistryMimeDetector;
 public class TardisClient {
 
 	public static final String API_VERSION_1 = "/api/v1";
+	public static final String URL_ENDING = "/";
+	public static final String DOWNLOAD = "download";
 	public static final String NO_DEFAULT_PROVIDED = "No default provided.";
-
+	
 	private Logger logger = LogManager.getLogger(this.getClass());
 	private Gson gson = new Gson();
+	private String protocol = "http";
 	private String address = "";
 	private String user = "";
 	private String pass = "";
@@ -86,19 +89,22 @@ public class TardisClient {
 	 *            authentication user.
 	 * @param passwd
 	 *            authentication password.
+	 * @param protocol
+	 *            protocol to use for the request.
 	 */
-	public TardisClient(String address, String username, String passwd) {
+	public TardisClient(String address, String username, String passwd, String protocol) {
 		super();
 		this.address = address;
 		this.user = username;
-		this.pass = passwd;
-
+		this.pass = passwd;		
+		this.protocol = protocol;
+		
 		// initialize date format
 		sdf.setLenient(false);
 
 		// set up tardis uri
 		try {
-			this.uri = new URI("http://" + this.address);
+			this.uri = new URI(this.protocol + "://" + this.address);
 		} catch (URISyntaxException e) {
 			logger.error("failed to create tardis url with: " + e.getMessage());
 		}
@@ -123,6 +129,20 @@ public class TardisClient {
 
 		// finished
 		return;
+	}
+	
+	/**
+	 * TardisClient default constructor.
+	 * 
+	 * @param address
+	 *            domain---or ip address---and port of the myTardis server.
+	 * @param username
+	 *            authentication user.
+	 * @param passwd
+	 *            authentication password.
+	 */
+	public TardisClient(String address, String username, String passwd) {
+		this(address, username, passwd, "http");
 	}
 
 	/***************
@@ -255,7 +275,7 @@ public class TardisClient {
 			logger.debug("target = " + target.toString());
 
 			// make request
-			Response response = target.queryParam("format", "json").request()
+			Response response = target.path(URL_ENDING).queryParam("format", "json").request()
 					.get();
 
 			// parse response
@@ -302,7 +322,8 @@ public class TardisClient {
 		WebTarget target = this.buildWebTarget(null);
 		Response response = target.path(TardisClient.API_VERSION_1)
 				.path(TardisObject.path(clazz)).path(id.toString())
-				.queryParam("format", "json").request().get();
+				.path(URL_ENDING).queryParam("format", "json")
+				.request().get();
 
 		// check response
 		this.checkResponse(response);
@@ -341,6 +362,62 @@ public class TardisClient {
 		return result;
 	}
 
+	/**
+	 * Get the content of a DatasetFile by Id
+	 * 
+	 * @param id
+	 *            of the DatasetFile.
+	 * @return binary content of the required DatasetFile.
+	 * @throws Exception
+	 *             thrown if the object is not found.
+	 */
+	public byte[] getDatasetFileContentById(Integer id) throws Exception {
+		logger.debug("start!");
+		byte[] result = null;
+
+		// make request
+		WebTarget target = this.buildWebTarget(null);
+		Response response = target.path(TardisClient.API_VERSION_1)
+				.path(TardisObject.path(DatasetFile.class)).path(id.toString())
+				.path(URL_ENDING).path(DOWNLOAD).path(URL_ENDING)
+				.request().get();
+
+		// check response
+		this.checkResponse(response);
+		
+		result = response.readEntity(byte[].class);
+        
+		// finished
+	    return result;
+	}
+	
+	/**
+	 * Get the content of a DatasetFile by URI
+	 * 
+	 * @param uri
+	 *            of the object as a String.
+	 * @return binary content of the required DatasetFile.
+	 * @throws Exception
+	 *             thrown if the object is not found.
+	 */
+	public byte[] getDatasetFileContentByUri(String uri) throws Exception {
+		logger.debug("start!");
+		byte[] result = null;
+
+		// make request
+		WebTarget target = this.buildWebTarget(null);
+		Response response = target.path(uri).path(DOWNLOAD).path(URL_ENDING)
+				.request().get();
+		
+		// check response
+		this.checkResponse(response);
+		
+		result = response.readEntity(byte[].class);
+        
+		// finished
+		return result;
+	}
+	
 	/****************
 	 * Post Methods *
 	 ****************/
@@ -625,6 +702,14 @@ public class TardisClient {
 	 * getters and setters *
 	 ***********************/
 
+		
+	/**
+	 * @return protocol used for the requests (default http).
+	 */
+	public String getProtocol() {
+		return this.protocol;
+	}
+	
 	/**
 	 * @return URI of myTardis API.
 	 */

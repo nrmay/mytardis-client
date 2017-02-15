@@ -464,4 +464,40 @@ public class TardisClientTest {
 		return;
 	}
 
+	@Test
+    public void testGetDatasetFileContent() {
+		
+		logger.debug("start!");
+		assertNotNull("TardisClient is null!", client);
+		assertNotNull("TardisClient.URI is null!", client.getURI());
+		assertEquals("TardisClient.URI not matched!", this.expectedURI, client
+				.getURI().toString());
+
+		Integer id = 1;
+		String uri = "/api/v1/dataset_file/1/";
+		
+		// retrieve the content of a Datasetfile by Id
+		byte[] result = null;
+		try {
+			result = client.getDatasetFileContentById(id);
+		} catch (Exception e) {
+			fail("valid credentials threw an exception: " + e.getMessage());
+		}
+		assertNotNull("datasetfile content is null!", result);
+		assertTrue("datasetfile content is empty!", result.length > 0);
+
+		
+		// retrieve the content of a Datasetfile by URI
+		result = null;
+		try {
+			result = client.getDatasetFileContentByUri(uri);
+		} catch (Exception e) {
+			fail("valid credentials threw an exception: " + e.getMessage());
+		}
+		assertNotNull("datasetfile content is null!", result);
+		assertTrue("datasetfile content is empty!", result.length > 0);
+		
+		// finished
+		return;
+	}
 }
